@@ -7,6 +7,7 @@ class CustomUserManager(BaseUserManager):
         """
         Creates and saves a User with the given email, phone, and password.
         """
+       
         if not email:
             raise ValueError("Users must have an email address")
 
@@ -31,7 +32,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, phone, password=password, **extra_fields)
 
 class CustomUser(AbstractUser):
-    GENDER = [("Male", "Male"), ("Female", "Female"), ("Other", "Other")]
+    GENDER = [("M", "Male"), ("F", "Female"), ("Other", "Other")]
     email = models.EmailField(
         verbose_name='Email Address',
         max_length=100,
@@ -49,3 +50,28 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+class Doctor(models.Model):
+    SPECIALIZATIONS=[("Pyschiatrist","Pyschiatrist"), ("Clinical Pyschologist","Clinical Pyschologist")]
+    user=models.OneToOneField("CustomUser",on_delete=models.CASCADE)
+    #contact_info=models.ManyToManyField("ContactInfo", blank=True, null=True)
+    specialization=models.CharField(max_length=50, choices=SPECIALIZATIONS)
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name} - {self.specialization}"
+    
+class  Patient(models.Model):
+    doctor=models.ForeignKey("Doctor", on_delete=models.SET_NULL, related_name="patients", null=True)
+    user=models.OneToOneField("CustomUser", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name} - {self.doctor.user.first_name}"
+
+class PatientKin(models.Model):
+    RELATIONSHIPS=[("Sp", "Spouse"), ("Sb","Sibling"), ("P", "Parent"), ("Gp","GrandParent"), ("Other", "Other")]
+    patient=models.ForeignKey("Patient", on_delete=models.CASCADE, related_name="kins")
+    user=models.OneToOneField("CustomUser", on_delete=models.CASCADE)
+    relation=models.CharField(max_length=30, choices=RELATIONSHIPS)
+    
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name} - {self.patient.user.first_name}"
