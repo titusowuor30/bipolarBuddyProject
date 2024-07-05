@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     #custom apps
     'accounts',
     'core',
+    'notifications',
     ]
 
 AUTH_USER_MODEL="accounts.CustomUser"

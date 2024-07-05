@@ -41,7 +41,7 @@ class CustomUser(AbstractUser):
     gender = models.CharField(max_length=10, choices=GENDER, default='Other')
     phone = models.CharField(max_length=15, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
-    national_id = models.PositiveIntegerField(max_length=8, unique=True, blank=True, null=True)
+    national_id = models.CharField(max_length=8, unique=True, blank=True, null=True)
 
     objects = CustomUserManager()
 
