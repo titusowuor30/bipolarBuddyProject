@@ -10,12 +10,4 @@ class CustomUserCreationForm(UserCreationForm):
         fields = ('email', 'first_name', 'last_name', 'phone', 'gender', 'dob', 'national_id')
 
 class CustomUserLoginForm(AuthenticationForm):
-    username = forms.EmailField(label='Email')
-
-class CustomUserCreationForm(UserCreationForm):
-    class Meta:
-        model = User
-        fields = ('email', 'first_name', 'last_name', 'phone', 'gender', 'dob', 'national_id')
-
-class CustomUserLoginForm(AuthenticationForm):
-    username = forms.EmailField(label='Email')
+    pass
