@@ -19,5 +19,6 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/',include('accounts.urls')) #http://localhost:8000/accounts/login/
+    path('accounts/',include('accounts.urls')), #http://localhost:8000/accounts/login/
+    path('index/',include('core.urls'))#
 ]

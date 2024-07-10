@@ -1,3 +1,6 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 
-# Create your views here.
+#function based and class based view functions
+def home(request):
+    return HttpResponse("You hit the home page. Coming soon!")
