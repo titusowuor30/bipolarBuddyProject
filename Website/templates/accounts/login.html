@@ -1,0 +1,10 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="main">
+    {% csrf_token %}
+     {{form}}
+    <button type="submit">Login</button>
+</main>
+{% endblock content %}

@@ -18,7 +18,7 @@ def login_view(request):
     if request.method == 'POST':
         form = CustomUserLoginForm(request, data=request.POST)
         if form.is_valid():
-            email = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
             user = authenticate(request, email=email, password=password)
             if user is not None:
@@ -26,4 +26,4 @@ def login_view(request):
                 return redirect('home')  # Redirect to a success page
     else:
         form = CustomUserLoginForm()
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'accounts/login.html', {'form': form})
