@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Vitals Tracker</string>
+    <string name="msg">Please enable all permission</string>
+    <string-array name="Gender">
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>

@@ -1,0 +1,16 @@
+<!-- base_form.html -->
+{% load widget_tweaks %}
+<form method="POST" action="{{ form_action }}" enctype="multipart/form-data" id="{{form_id}}">
+    {% csrf_token %}
+    <div class="mb-3">
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field | add_class:"form-control" | add_error_class:"is-invalid" }}
+                {{ field.help_text }}
+                <p class="bg-danger">{{ field.errors }}</p>
+            </div>
+        {% endfor %}
+    </div>
+    <input type="submit" value="{{ button_value }}" class="w-25 btn btn-primary text-white" id="loginbtn" />
+</form>
