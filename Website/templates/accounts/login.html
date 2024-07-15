@@ -1,10 +1,19 @@
 {% extends 'core/base.html' %}
-{% load static %}
-
 {% block content %}
-<main class="main">
-    {% csrf_token %}
-     {{form}}
-    <button type="submit">Login</button>
-</main>
+<section class="card justify-content-between">
+    <div class="container">
+        <div class="row mt-4 p-2">
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">Welcome Back! Login to BipolarBuddy</h3>
+                    </div>
+                    {% include "core/base_form.html" with messages=messages form_action='.'  form=form button_value='Login' %}
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock content %}
