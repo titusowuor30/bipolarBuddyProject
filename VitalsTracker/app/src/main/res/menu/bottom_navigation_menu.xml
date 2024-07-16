@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_about"
+        android:icon="@mipmap/about"
+        android:title="About" />
+    <item
+        android:id="@+id/navigation_vitals"
+        android:icon="@mipmap/heartbeat"
+        android:title="Vitals" />
+    <item
+        android:id="@+id/navigation_reminders"
+        android:icon="@mipmap/reminder"
+        android:title="Reminders" />
+</menu>

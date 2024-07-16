@@ -5,16 +5,12 @@
     android:id="@+id/activity_primary"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bg4"
-    android:gravity="center"
     android:orientation="vertical"
     android:paddingLeft="16dp"
     android:paddingTop="16dp"
     android:paddingRight="16dp"
     android:paddingBottom="16dp"
-    android:weightSum="1"
-    tools:context="com.example.yo7a.healthwatcher.Primary">
-
+    tools:context=".Primary">
 
     <ImageView
         android:id="@+id/imageView"
@@ -65,10 +61,14 @@
         android:id="@+id/About"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:layout_gravity="right"
         android:background="@android:color/transparent"
-        android:scaleType="fitEnd"
         app:srcCompat="@mipmap/ab" />
 
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:menu="@menu/bottom_navigation_menu" />
 
 </LinearLayout>
