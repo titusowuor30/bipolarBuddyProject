@@ -49,12 +49,13 @@ def signup_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
+            messages.success(request,"Your account has been created successfully!")
             user = form.save()
             login(request, user)
             return redirect('home')  # Redirect to a success page
     else:
         form = CustomUserCreationForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'accounts/signup.html', {'form': form})
 
 def log_out(request):
     logout(request)
