@@ -1,6 +1,11 @@
-package com.bengohub.vitalstracker;
+package com.bengohub.VitalsTracker;
 
-public class ImageProcessing {
+/**
+ * Created by Yo7A on 5/9/2017.
+ */
+
+abstract class ImageProcessing {
+
     private static int decodeYUV420SPtoRedBlueGreenSum(byte[] yuv420sp, int width, int height, int type) {
         if (yuv420sp == null) return 0;
 
@@ -63,13 +68,14 @@ public class ImageProcessing {
      * @param height   Height of the image.
      * @return int representing the average amount of red in the image.
      */
-    public static double decodeYUV420SPtoRedBlueGreenAvg(byte[] yuv420sp, int width, int height, int type) {
+    static double decodeYUV420SPtoRedBlueGreenAvg(byte[] yuv420sp, int width, int height, int type) {
         if (yuv420sp == null) return 0;
         final int frameSize = width * height;
 
         int sum = decodeYUV420SPtoRedBlueGreenSum(yuv420sp, width, height, type);
 
-        return ((double) sum / frameSize);
+        return (sum / frameSize);
     }
-
 }
+
+

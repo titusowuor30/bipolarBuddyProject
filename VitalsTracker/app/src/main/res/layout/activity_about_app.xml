@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_about_app"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/bg4"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingTop="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp"
+    android:weightSum="1"
+    tools:context="com.example.yo7a.VitalsTracker.AboutApp">
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="match_parent"
+        android:layout_height="146dp"
+        app:srcCompat="@mipmap/logo" />
+
+    <TextView
+        android:id="@+id/textView9"
+        android:layout_width="wrap_content"
+        android:layout_height="541dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="89dp"
+        android:fontFamily="cursive"
+        android:text="@string/welcome_to_the_bipolarbuddy_app_at_bipolarbuddy_we_understand_the_unique_challenges_faced_by_individuals_living_with_bipolar_disorder_our_commitment_to_providing_comprehensive_and_compassionate_care_has_driven_us_to_develop_this_innovative_mobile_application_designed_with_you_in_mind_our_app_is_a_tool_to_help_you_track_your_mood_manage_your_medication_and_access_valuable_resources_and_support"
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="30sp"
+        android:textStyle="bold" />
+</LinearLayout>
