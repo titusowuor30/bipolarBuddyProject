@@ -1,74 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_primary"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingLeft="16dp"
-    android:paddingTop="16dp"
-    android:paddingRight="16dp"
-    android:paddingBottom="16dp"
-    tools:context=".Primary">
+    tools:context="com.bengohub.VitalsTracker.Primary">
 
-    <ImageView
-        android:id="@+id/imageView"
+    <LinearLayout
+        android:id="@+id/activity_primary"
         android:layout_width="match_parent"
-        android:layout_height="110dp"
-        app:srcCompat="@mipmap/logo" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="16dp">
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="10dp" />
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            android:elevation="4dp" />
 
-    <ImageButton
-        android:id="@+id/HR"
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            app:srcCompat="@mipmap/logo" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <ImageButton
+            android:id="@+id/HR"
+            android:layout_width="wrap_content"
+            android:layout_height="75dp"
+            android:background="@android:color/transparent"
+            app:srcCompat="@mipmap/hr1" />
+
+        <ImageButton
+            android:id="@+id/RR"
+            android:layout_width="wrap_content"
+            android:layout_height="75dp"
+            android:background="@android:color/transparent"
+            app:srcCompat="@mipmap/rr1" />
+
+        <ImageButton
+            android:id="@+id/BP"
+            android:layout_width="wrap_content"
+            android:layout_height="75dp"
+            android:background="@android:color/transparent"
+            app:srcCompat="@mipmap/bp1" />
+
+        <ImageButton
+            android:id="@+id/O2"
+            android:layout_width="wrap_content"
+            android:layout_height="75dp"
+            android:background="@android:color/transparent"
+            app:srcCompat="@mipmap/or1" />
+
+        <ImageButton
+            android:id="@+id/VS"
+            android:layout_width="wrap_content"
+            android:layout_height="75dp"
+            android:background="@android:color/transparent"
+            app:srcCompat="@mipmap/avs" />
+
+        <ImageButton
+            android:id="@+id/About"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            app:srcCompat="@mipmap/ab" />
+    </LinearLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
-        android:layout_height="75dp"
-        android:background="@android:color/transparent"
-        app:srcCompat="@mipmap/hr1" />
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:menu="@menu/drawer_menu" />
 
-    <ImageButton
-        android:id="@+id/RR"
-        android:layout_width="wrap_content"
-        android:layout_height="75dp"
-        android:background="@android:color/transparent"
-        app:srcCompat="@mipmap/rr1" />
-
-    <ImageButton
-        android:id="@+id/BP"
-        android:layout_width="wrap_content"
-        android:layout_height="75dp"
-        android:background="@android:color/transparent"
-        app:srcCompat="@mipmap/bp1" />
-
-    <ImageButton
-        android:id="@+id/O2"
-        android:layout_width="wrap_content"
-        android:layout_height="75dp"
-        android:background="@android:color/transparent"
-        app:srcCompat="@mipmap/or1" />
-
-    <ImageButton
-        android:id="@+id/VS"
-        android:layout_width="wrap_content"
-        android:layout_height="75dp"
-        android:background="@android:color/transparent"
-        app:srcCompat="@mipmap/avs" />
-
-    <ImageButton
-        android:id="@+id/About"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:background="@android:color/transparent"
-        app:srcCompat="@mipmap/ab" />
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:menu="@menu/bottom_navigation_menu" />
-
-</LinearLayout>
+</androidx.drawerlayout.widget.DrawerLayout>

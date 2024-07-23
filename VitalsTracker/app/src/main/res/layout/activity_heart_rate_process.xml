@@ -11,7 +11,7 @@
     android:paddingRight="64dp"
     android:paddingBottom="16dp"
     android:weightSum="1"
-    tools:context="com.example.yo7a.VitalsTracker.HeartRateProcess">
+    tools:context="com.bengohub.VitalsTracker.HeartRateProcess">
 
 
     <SurfaceView

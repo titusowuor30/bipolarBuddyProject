@@ -3,6 +3,11 @@
     <string name="msg">Please enable all permission</string>
     <string name="welcome_to_the_bipolarbuddy_app_at_bipolarbuddy_we_understand_the_unique_challenges_faced_by_individuals_living_with_bipolar_disorder_our_commitment_to_providing_comprehensive_and_compassionate_care_has_driven_us_to_develop_this_innovative_mobile_application_designed_with_you_in_mind_our_app_is_a_tool_to_help_you_track_your_mood_manage_your_medication_and_access_valuable_resources_and_support">Welcome to the BipolarBuddy App.At BipolarBuddy, we understand the unique challenges faced by individuals living with bipolar disorder. Our commitment to providing comprehensive and compassionate care has driven us to develop this innovative mobile application. Designed with you in mind, our app is a tool to help you track your mood, manage your medication, and access valuable resources and support.</string>
 
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="settings">Settings</string>
+    <string name="reminders">Reminders</string>
+
     <string-array name="Gender">
         <item>Male</item>
         <item>Female</item>
