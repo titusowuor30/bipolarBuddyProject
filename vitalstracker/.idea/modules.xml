@@ -2,11 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/VitalsTracker.iml" filepath="$PROJECT_DIR$/.idea/VitalsTracker.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.androidTest.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/vitalstracker.iml" filepath="$PROJECT_DIR$/.idea/modules/vitalstracker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/vitalstracker.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/vitalstracker.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/vitalstracker.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/vitalstracker.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/vitalstracker.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/vitalstracker.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/vitalstracker.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/vitalstracker.app.unitTest.iml" />
     </modules>
   </component>
 </project>

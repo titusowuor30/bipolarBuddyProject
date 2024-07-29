@@ -8,7 +8,7 @@ class PatientKinInline(admin.StackedInline):
 # Register your models here.
 @admin.register(CustomUser)
 class UserAdmin(admin.ModelAdmin):
-    list_display=['email','first_name','last_name','dob']
+    list_display=['email','first_name','last_name','age']
 
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):

@@ -40,12 +40,13 @@ class CustomUser(AbstractUser):
     )
     gender = models.CharField(max_length=10, choices=GENDER, default='Other')
     phone = models.CharField(max_length=15, blank=True, null=True)
-    dob = models.DateField(blank=True, null=True)
-    national_id = models.CharField(max_length=8, unique=True, blank=True, null=True)
+    age = models.IntegerField(default=18,blank=True, null=True)
+    height = models.IntegerField(max_length=8, blank=True, null=True)
+    weight = models.IntegerField(max_length=8,blank=True, null=True)
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = "email"
+    #USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['phone', 'first_name', 'last_name']
 
     def __str__(self):

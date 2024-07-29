@@ -9,13 +9,15 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.bengohub.VitalsTracker.R;
 
+import java.util.Objects;
+
 public class SettingsActivity extends AppCompatActivity {
 
     private EditText apiEndpointEditText;
     private Button saveButton;
     private SharedPreferences sharedPreferences;
     private static final String PREFS_NAME = "ApiSettings";
-    private static final String KEY_API_ENDPOINT = "api_endpoint";
+    private static final String KEY_API_ENDPOINT = "api_base_url";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +27,7 @@ public class SettingsActivity extends AppCompatActivity {
         // Initialize views
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         apiEndpointEditText = findViewById(R.id.api_endpoint);
         saveButton = findViewById(R.id.save_button);

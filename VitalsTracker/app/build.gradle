@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 34
-    buildToolsVersion "25.0.3"
+    //buildToolsVersion "25.0.3"
     defaultConfig {
         applicationId "com.bengohub.VitalsTracker"
         namespace 'com.bengohub.VitalsTracker'
@@ -31,6 +31,9 @@ dependencies {
     androidTestImplementation('androidx.test.espresso:espresso-core:3.6.1') {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
+
+    implementation 'com.squareup.okhttp3:okhttp:4.9.1'
+    implementation 'com.google.code.gson:gson:2.10.1'  // Add this line
 
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
