@@ -14,8 +14,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.yo7a.VitalsTracker.Math.Fft;
-import com.example.yo7a.VitalsTracker.Math.Fft2;
+import com.bengohub.VitalsTracker.Math.Fft;
+import com.bengohub.VitalsTracker.Math.Fft2;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -106,9 +106,8 @@ public class VitalSignsProcess extends AppCompatActivity {
 
         // WakeLock Initialization : Forces the phone to stay On
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "YourAppName::DoNotDimScreen");
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "VitalsTracker::DoNotDimScreen");
 
-        // Add this flag to keep the screen on
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 

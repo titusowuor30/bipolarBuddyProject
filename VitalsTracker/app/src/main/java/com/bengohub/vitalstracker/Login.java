@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.util.Patterns;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -23,6 +24,8 @@ import androidx.core.content.ContextCompat;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -31,7 +34,7 @@ import java.util.regex.Pattern;
 
 public class Login extends AppCompatActivity {
 
-    public ImageButton Log;
+    public ImageButton LoginButton;
     public EditText ed1, ed2, ed3, ed4, ed5, ed6, ed7, ed8;
     private Toast mainToast;
     public Spinner GenderSpin;
@@ -61,7 +64,7 @@ public class Login extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
         }
 
-        Log = findViewById(R.id.Login);
+        LoginButton = findViewById(R.id.Login);
         ed1 = findViewById(R.id.edth);
         ed2 = findViewById(R.id.edtw);
         ed3 = findViewById(R.id.edtn);
@@ -77,7 +80,7 @@ public class Login extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         GenderSpin.setAdapter(adapter);
 
-        Log.setOnClickListener(v -> {
+        LoginButton.setOnClickListener(v -> {
             check1 = 0;
             heightStr = ed1.getText().toString();
             weightStr = ed2.getText().toString();
@@ -171,7 +174,7 @@ public class Login extends AppCompatActivity {
 
                 // Retrieve API base URL from SharedPreferences
                 SharedPreferences sharedPreferences = getSharedPreferences("ApiSettings", MODE_PRIVATE);
-                String apiBaseUrl = sharedPreferences.getString("api_base_url", "http://127.0.0.1:8000/api/");
+                String apiBaseUrl = sharedPreferences.getString("api_base_url", "http://192.168.8.12:8000/api/");
 
                 // Post user details to API
                 postUserDetailsToApi(apiBaseUrl, per);
@@ -188,7 +191,7 @@ public class Login extends AppCompatActivity {
     private void postUserDetailsToApi(String apiBaseUrl, user user) {
         new Thread(() -> {
             try {
-                URL url = new URL(apiBaseUrl + "patients/signup");
+                URL url = new URL(apiBaseUrl + "patients/signup/");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -214,23 +217,38 @@ public class Login extends AppCompatActivity {
 
                 int responseCode = conn.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_CREATED) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    StringBuilder response = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    Log.i("Login", "Response: " + response.toString());
+
                     // Success
                     new Handler(Looper.getMainLooper()).post(() -> {
                         Toast.makeText(getApplicationContext(), "User created successfully on server", Toast.LENGTH_SHORT).show();
                     });
                 } else {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                    String inputLine;
+                    StringBuilder response = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    Log.e("Login", "Response code: " + responseCode + ", Response: " + response.toString());
+
                     // Failure
                     new Handler(Looper.getMainLooper()).post(() -> {
                         Toast.makeText(getApplicationContext(), "Failed to create user on server", Toast.LENGTH_SHORT).show();
                     });
                 }
-
-                conn.disconnect();
+            } catch (JSONException e) {
+                Log.e("Login", "JSON Exception: " + e.getMessage());
             } catch (Exception e) {
-                e.printStackTrace();
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    Toast.makeText(getApplicationContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                Log.e("Login", "Exception: " + e.getMessage());
             }
         }).start();
     }

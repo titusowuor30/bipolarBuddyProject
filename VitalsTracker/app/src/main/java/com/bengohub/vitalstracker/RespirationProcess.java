@@ -15,7 +15,7 @@ import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.yo7a.VitalsTracker.Math.Fft2;
+import com.bengohub.VitalsTracker.Math.Fft2;
 import com.google.gson.Gson;
 
 import java.io.BufferedWriter;
@@ -26,6 +26,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Base64;
 
 import static java.lang.Math.ceil;
 
@@ -75,7 +76,7 @@ public class RespirationProcess extends Activity {
         ProgRR.setProgress(0);
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "YourAppName::DoNotDimScreen");
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "VitalsTracker::DoNotDimScreen");
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
@@ -89,7 +90,7 @@ public class RespirationProcess extends Activity {
     public void onResume() {
         super.onResume();
 
-        wakeLock.acquire();
+        wakeLock.acquire(10*60*1000L /*10 minutes*/);
 
         camera = Camera.open();
 
@@ -144,8 +145,8 @@ public class RespirationProcess extends Activity {
             double totalTimeInSecs = (endTime - startTime) / 1000d;
             if (totalTimeInSecs >= 30) {
 
-                Double[] Green = GreenAvgList.toArray(new Double[GreenAvgList.size()]);
-                Double[] Red = RedAvgList.toArray(new Double[RedAvgList.size()]);
+                Double[] Green = GreenAvgList.toArray(new Double[0]);
+                Double[] Red = RedAvgList.toArray(new Double[0]);
 
                 SamplingFreq = (counter / totalTimeInSecs);
                 double RRFreq = Fft2.FFT(Green, counter, SamplingFreq);
@@ -153,15 +154,7 @@ public class RespirationProcess extends Activity {
                 double RR1Freq = Fft2.FFT(Red, counter, SamplingFreq);
                 double breath1 = (int) ceil(RR1Freq * 60);
 
-                if ((bpm > 10 || bpm < 24)) {
-                    if ((breath1 > 10 || breath1 < 24)) {
-                        bufferAvgBr = (bpm + breath1) / 2;
-                    } else {
-                        bufferAvgBr = bpm;
-                    }
-                } else if ((breath1 > 10 || breath1 < 24)) {
-                    bufferAvgBr = breath1;
-                }
+                bufferAvgBr = (bpm + breath1) / 2;
 
                 if (bufferAvgBr < 10 || bufferAvgBr > 24) {
                     inc = 0;
@@ -176,7 +169,8 @@ public class RespirationProcess extends Activity {
                 }
                 Breath = (int) bufferAvgBr;
 
-                sendResultsToApi(Breath, user); // Send the results to the API
+                // Send results to API
+                sendResultsToApi(Breath, user);
             }
 
             if (Breath != 0) {
@@ -196,13 +190,18 @@ public class RespirationProcess extends Activity {
     };
 
     private void sendResultsToApi(int breath, String user) {
+        // Get user credentials from the database
+        String[] credentials = Data.getUserCredentials(user); // Assume this method returns an array with email and password
+        String email = credentials[0];
+        String password = credentials[1];
+
         SharedPreferences sharedPreferences = getSharedPreferences("ApiSettings", Context.MODE_PRIVATE);
-        String baseUrl = sharedPreferences.getString("api_base_url", "http://192.168.8.6:8000/api/");
+        String baseUrl = sharedPreferences.getString("api_base_url", "http://192.168.8.12:8000/api/");
 
         String url = baseUrl + "vitals/"; // Adjust the endpoint accordingly
 
         // Create JSON object for the request body
-        UserResult userResult = new UserResult(user, breath);
+        UserResult userResult = new UserResult(email, breath);
         String json = new Gson().toJson(userResult);
 
         new Thread(() -> {
@@ -214,6 +213,15 @@ public class RespirationProcess extends Activity {
                 urlConnection.setRequestMethod("POST");
                 urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 urlConnection.setRequestProperty("Accept", "application/json");
+
+                // Set Basic Authentication header
+                String auth = email + ":" + password;
+                String encodedAuth = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+                }
+                String authHeader = "Basic " + encodedAuth;
+                urlConnection.setRequestProperty("Authorization", authHeader);
 
                 try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8"))) {
                     writer.write(json);
@@ -265,6 +273,7 @@ public class RespirationProcess extends Activity {
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
+            // Release resources if needed
         }
     };
 
@@ -298,11 +307,11 @@ public class RespirationProcess extends Activity {
 
 class UserResult {
     private String user;
-    private int breath;
+    private int respiration_rate;
 
     public UserResult(String user, int breath) {
         this.user = user;
-        this.breath = breath;
+        this.respiration_rate = breath;
     }
 
     public String getUser() {
@@ -310,6 +319,6 @@ class UserResult {
     }
 
     public int getBreath() {
-        return breath;
+        return respiration_rate;
     }
 }

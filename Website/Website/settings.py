@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-aki!-0w-8!2el-o7xik)2kx&=!$@5qlx_pco((cv*--z$5+!fr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.100','192.168.8.6','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['192.168.137.62','192.168.8.12','192.168.8.6','localhost','127.0.0.1']
 
 
 # Application definition
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     #custom apps
     'accounts',
+    'appointments',
     'core',
     'notifications',
     ]
@@ -89,10 +90,22 @@ WSGI_APPLICATION = 'Website.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME':'bipolardb',
+        'USER':'root',
+        'HOST':'localhost',
+        'PORT':3306,
+        'PASSWORD':'root',
     }
 }
 
@@ -158,14 +171,13 @@ SPECTACULAR_SETTINGS = {
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
+USE_I18N = True
+
+USE_TZ = True
 
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Africa/Nairobi'
-
-USE_I18N = True
-
-USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)

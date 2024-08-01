@@ -1,4 +1,4 @@
-package com.example.yo7a.VitalsTracker.Math;
+package com.bengohub.VitalsTracker.Math;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more

@@ -46,16 +46,28 @@ class CustomUser(AbstractUser):
 
     objects = CustomUserManager()
 
-    #USERNAME_FIELD = "email"
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ['phone', 'first_name', 'last_name']
 
     def __str__(self):
         return self.email
+    
+class Departments(models.Model):
+    name=models.CharField(max_length=255)
+    short_description=models.CharField(max_length=255)
+    description=models.TextField()
+
+    class Meta:
+        verbose_name_plural='Departments'
+
+    def __str__(self):
+        return self.name
+    
 
 class Doctor(models.Model):
     SPECIALIZATIONS=[("Pyschiatrist","Pyschiatrist"), ("Clinical Pyschologist","Clinical Pyschologist")]
+    department=models.ForeignKey(Departments,on_delete=models.SET_NULL,null=True,blank=True,related_name='doctors')
     user=models.OneToOneField("CustomUser",on_delete=models.CASCADE)
-    #contact_info=models.ManyToManyField("ContactInfo", blank=True, null=True)
     specialization=models.CharField(max_length=50, choices=SPECIALIZATIONS)
 
     def __str__(self):

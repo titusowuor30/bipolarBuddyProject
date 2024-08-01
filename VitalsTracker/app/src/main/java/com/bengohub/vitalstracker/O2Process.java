@@ -6,10 +6,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.hardware.Camera;
-import android.hardware.Camera.PreviewCallback;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
+import android.util.Base64;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -17,16 +17,14 @@ import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.yo7a.VitalsTracker.Math.Fft;
+import com.bengohub.VitalsTracker.Math.Fft;
 
-import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.sqrt;
@@ -38,10 +36,12 @@ public class O2Process extends Activity {
     private SurfaceView preview = null;
     private static SurfaceHolder previewHolder = null;
     private static Camera camera = null;
-    private static WakeLock wakeLock = null;
+    private static PowerManager.WakeLock wakeLock = null;
 
     private Toast mainToast;
     public String user;
+    UserDB Data = new UserDB(this); // Initialize UserDB
+
     private ProgressBar ProgO2;
     public int ProgP = 0;
     public int inc = 0;
@@ -76,7 +76,7 @@ public class O2Process extends Activity {
         ProgO2.setProgress(0);
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "YourAppName::DoNotDimScreen");
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "VitalsTracker::DoNotDimScreen");
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
@@ -90,7 +90,7 @@ public class O2Process extends Activity {
     public void onResume() {
         super.onResume();
 
-        wakeLock.acquire();
+        wakeLock.acquire(10 * 60 * 1000L /*10 minutes*/);
 
         camera = Camera.open();
         camera.setDisplayOrientation(90);
@@ -107,7 +107,7 @@ public class O2Process extends Activity {
         camera = null;
     }
 
-    private final PreviewCallback previewCallback = new PreviewCallback() {
+    private final Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
 
         @Override
         public void onPreviewFrame(byte[] data, Camera cam) {
@@ -178,7 +178,8 @@ public class O2Process extends Activity {
                     return;
                 }
 
-                sendResultsToApi(o2, bpm);
+                // Send the results to the API
+                new SendResultsTask(o2, bpm, user).execute();
             }
 
             if (o2 != 0) {
@@ -198,37 +199,69 @@ public class O2Process extends Activity {
         }
     };
 
-    private void sendResultsToApi(int o2, double bpm) {
-        SharedPreferences sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE);
-        String baseUrl = sharedPreferences.getString("BaseUrl", "http://default.url"); // Replace with default URL if not set
+    private class SendResultsTask extends AsyncTask<Void, Void, Boolean> {
+        private int o2;
+        private double bpm;
+        private String username;
 
-        OkHttpClient client = new OkHttpClient();
-        MediaType JSON = MediaType.get("application/json; charset=utf-8");
+        SendResultsTask(int o2, double bpm, String username) {
+            this.o2 = o2;
+            this.bpm = bpm;
+            this.username = username;
+        }
 
-        String json = String.format("{\"user\":\"%s\",\"o2\":%d,\"bpm\":%.2f}", user, o2, bpm);
-        RequestBody body = RequestBody.create(json, JSON);
-        Request request = new Request.Builder()
-                .url(baseUrl + "/api/results") // Update with the correct endpoint
-                .post(body)
-                .build();
-
-        client.newCall(request).enqueue(new okhttp3.Callback() {
-            @Override
-            public void onFailure(okhttp3.Call call, IOException e) {
-                Log.e(TAG, "API request failed: " + e.getMessage());
-                runOnUiThread(() -> Toast.makeText(O2Process.this, "Failed to send results", Toast.LENGTH_SHORT).show());
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            // Get user credentials from the database
+            String[] credentials = Data.getUserCredentials(username); // Ensure this method returns an array with email and password
+            if (credentials == null || credentials.length < 2) {
+                Log.e(TAG, "Failed to retrieve user credentials.");
+                return false;
             }
+            String email = credentials[0];
+            String password = credentials[1];
 
-            @Override
-            public void onResponse(okhttp3.Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.e(TAG, "Unexpected code " + response);
-                    runOnUiThread(() -> Toast.makeText(O2Process.this, "Failed to send results", Toast.LENGTH_SHORT).show());
-                } else {
-                    Log.i(TAG, "Results sent successfully");
+            SharedPreferences sharedPreferences = getSharedPreferences("ApiSettings", Context.MODE_PRIVATE);
+            String baseUrl = sharedPreferences.getString("api_base_url", "http://192.168.8.12:8000/api/");
+
+            HttpURLConnection urlConnection = null;
+            try {
+                URL url = new URL(baseUrl + "vitals/"); // Ensure the correct endpoint
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+
+                String authcredentials = email + ":" + password;
+                String basicAuth = "Basic " + Base64.encodeToString(authcredentials.getBytes(), Base64.NO_WRAP);
+                urlConnection.setRequestProperty("Authorization", basicAuth);
+
+                String json = String.format("{\"user\":\"%s\",\"o2_saturation\":%d}", email, o2);
+                byte[] outputInBytes = json.getBytes(StandardCharsets.UTF_8);
+                OutputStream os = urlConnection.getOutputStream();
+                os.write(outputInBytes);
+                os.close();
+
+                int responseCode = urlConnection.getResponseCode();
+                return responseCode == 200;
+
+            } catch (Exception e) {
+                Log.e(TAG, "API request failed: " + e.getMessage(), e);
+                return false;
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
                 }
             }
-        });
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            if (success) {
+                Toast.makeText(O2Process.this, "Results sent successfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(O2Process.this, "Failed to send results", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private final SurfaceHolder.Callback surfaceCallback = new SurfaceHolder.Callback() {

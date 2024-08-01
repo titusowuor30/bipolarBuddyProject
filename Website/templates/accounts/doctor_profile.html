@@ -1,0 +1,161 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<!-- Doctor Profile Section -->
+<section id="doctor-profile" class="doctor-profile section">
+    <div class="container">
+        <h4 class="mb-2">Doctor Profile</h4>
+        <hr />
+        <div class="row">
+            <!-- Account Details -->
+            <div class="col-md-6">
+                <h3>Account Details</h3>
+                <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Phone:</strong> {{ user.phone }}</p>
+                <p><strong>Department:</strong> {{ doctor.department.name }}</p>
+                <p><strong>Specialization:</strong> {{ doctor.specialization }}</p>
+            </div>
+            <!-- Patient List -->
+            <div class="col-md-6">
+                <h3>My Patients</h3>
+                <ul class="list-group">
+                    {% for patient in patients %}
+                    <li class="list-group-item">
+                        {{ patient.user.first_name }} {{ patient.user.last_name }}
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No patients assigned</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <hr />
+        <div class="row mt-4">
+            <!-- Patient Vitals -->
+            <div class="col-md-8 p-1">
+                <h3 class="text-center">My Patient Vitals</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Heart Rate</th>
+                            <th>Blood Pressure</th>
+                            <th>O2 Saturation</th>
+                            <th>Respiration Rate</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vital in vitals %}
+                        <tr>
+                            <td>{{ vital.patient.user.first_name }} {{ vital.patient.user.last_name }}</td>
+                            <td>{{ vital.heart_rate }}</td>
+                            <td>{{ vital.blood_pressure }}</td>
+                            <td>{{ vital.o2_saturation }}</td>
+                            <td>{{ vital.respiration_rate }}</td>
+                            <td>{{ vital.timestamp }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No vitals recorded</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Patient Tremors -->
+            <div class="col-md-4 p-1">
+                <h3 class="text-center">My Patient Tremors</h3>
+                <table class="table table-bordered ml-4">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Time Recorded</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tremor in tremors %}
+                        <tr>
+                            <td>{{ tremor.patient.user.first_name }} {{ tremor.patient.user.last_name }}</td>
+                            <td>{{ tremor.timestamp }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No tremor records</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <!-- Patient Prescriptions -->
+            <div class="col-md-12">
+                <h3>My Patient Prescriptions</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Medication</th>
+                            <th>Dosage</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prescription in prescriptions %}
+                        <tr>
+                            <td>{{ prescription.patient.user.first_name }} {{ prescription.patient.user.last_name }}</td>
+                            <td>{{ prescription.medication_name }}</td>
+                            <td>{{ prescription.dosage }}</td>
+                            <td>{{ prescription.created_at }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">No prescriptions found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <!-- Appointments Management -->
+            <div class="col-md-12">
+                <h3>Manage My Appointments</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in appointments %}
+                        <tr>
+                            <td>{{ appointment.user.first_name }} {{ appointment.user.last_name }}</td>
+                            <td>{{ appointment.date }}</td>
+                            <td>{{ appointment.get_status_display }}</td>
+                            <td>
+                                {% if appointment.status != 'Approved' %}
+                                <a href="{% url 'approve_appointment' appointment.id %}" class="btn btn-success">Approve</a>
+                                {% endif %}
+                                {% if appointment.status != 'Cancelled' %}
+                                <a href="{% url 'cancel_appointment' appointment.id %}" class="btn btn-danger">Cancel</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No appointments to manage</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

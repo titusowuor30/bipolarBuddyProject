@@ -18,7 +18,7 @@
  *  Copyright (c) 2016 by Bernd Porr
  */
 
-package com.example.yo7a.VitalsTracker.Math;
+package com.bengohub.VitalsTracker.Math;
 
 import org.apache.commons.math3.complex.Complex;
 

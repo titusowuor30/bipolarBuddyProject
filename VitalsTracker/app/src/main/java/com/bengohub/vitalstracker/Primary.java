@@ -1,6 +1,8 @@
 package com.bengohub.VitalsTracker;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 import com.bengohub.VitalsTracker.R;
@@ -53,6 +55,12 @@ public class Primary extends AppCompatActivity implements NavigationView.OnNavig
         if (extras != null) {
             user = extras.getString("Usr");
             //The key argument here must match that used in the other activity
+
+            // Save the username to SharedPreferences for use in ShakeService
+            SharedPreferences sharedPreferences = getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("User", user);
+            editor.apply();
         }
 
         Abt.setOnClickListener(v -> {
@@ -106,6 +114,10 @@ public class Primary extends AppCompatActivity implements NavigationView.OnNavig
             startActivity(i);
             finish();
         });
+
+        // Start the ShakeService
+        Intent shakeServiceIntent = new Intent(this, ShakeService.class);
+        startService(shakeServiceIntent);
     }
 
     @Override

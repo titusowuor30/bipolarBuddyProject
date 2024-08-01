@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<!-- Patient Profile Section -->
+<section id="patient-profile" class="patient-profile section">
+    <div class="container">
+        <h2>Patient Profile</h2>
+        <div class="row">
+            <!-- Account Details -->
+            <div class="col-md-6">
+                <h3>Account Details</h3>
+                <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Phone:</strong> {{ user.phone }}</p>
+                <p><strong>Age:</strong> {{ user.age }}</p>
+                <p><strong>Height:</strong> {{ user.height }}</p>
+                <p><strong>Weight:</strong> {{ user.weight }}</p>
+            </div>
+            <!-- Upcoming Appointments -->
+            <div class="col-md-6">
+                <h3>Upcoming Appointments</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Doctor</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in appointments %}
+                        <tr>
+                            <td>{{ appointment.date }}</td>
+                            <td>{{ appointment.doctor }}</td>
+                            <td>{{ appointment.department }}</td>
+                            <td>{{ appointment.get_status_display }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">No upcoming appointments</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

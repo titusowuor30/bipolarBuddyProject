@@ -1,4 +1,4 @@
-package com.example.yo7a.VitalsTracker.Math;
+package com.bengohub.VitalsTracker.Math;
 
 /**
  * The <code>Vector</code> class provides some useful static functions to

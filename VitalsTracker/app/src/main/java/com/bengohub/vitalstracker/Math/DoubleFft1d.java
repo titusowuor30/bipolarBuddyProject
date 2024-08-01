@@ -31,7 +31,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-package com.example.yo7a.VitalsTracker.Math;
+package com.bengohub.VitalsTracker.Math;
 
 import java.util.concurrent.Future;
 

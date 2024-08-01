@@ -8,8 +8,10 @@ import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
+import android.util.Base64;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -17,11 +19,13 @@ import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.yo7a.VitalsTracker.Math.Fft;
+import com.bengohub.VitalsTracker.Math.Fft;
 
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +37,7 @@ import static java.lang.Math.ceil;
 public class BloodPressureProcess extends Activity {
 
     // Variables Initialization
-    private static final String TAG = "HeartRateMonitor";
+    private static final String TAG = "BloodPressureProcess";
     private static final AtomicBoolean processing = new AtomicBoolean(false);
     private SurfaceView preview = null;
     private static SurfaceHolder previewHolder = null;
@@ -66,8 +70,8 @@ public class BloodPressureProcess extends Activity {
     private static int SP = 0, DP = 0;
 
     //Arraylist
-    public ArrayList<Double> GreenAvgList = new ArrayList<Double>();
-    public ArrayList<Double> RedAvgList = new ArrayList<Double>();
+    public ArrayList<Double> GreenAvgList = new ArrayList<>();
+    public ArrayList<Double> RedAvgList = new ArrayList<>();
     public int counter = 0;
 
     @Override
@@ -78,7 +82,6 @@ public class BloodPressureProcess extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             user = extras.getString("Usr");
-            //The key argument here must match that used in the other activity
         }
 
         Hei = Integer.parseInt(Data.getheight(user));
@@ -97,6 +100,9 @@ public class BloodPressureProcess extends Activity {
         previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         ProgBP = findViewById(R.id.BPPB);
         ProgBP.setProgress(0);
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "VitalsTracker::DoNotDimScreen");
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
@@ -145,13 +151,13 @@ public class BloodPressureProcess extends Activity {
             double GreenAvg;
             double RedAvg;
 
-            GreenAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 3); //1 stands for red intensity, 2 for blue, 3 for green
-            RedAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 1);  //1 stands for red intensity, 2 for blue, 3 for green
+            GreenAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 3);
+            RedAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 1);
 
             GreenAvgList.add(GreenAvg);
             RedAvgList.add(RedAvg);
 
-            ++counter; //counts number of frames in 30 seconds
+            ++counter;
 
             if (RedAvg < 200) {
                 inc = 0;
@@ -163,21 +169,18 @@ public class BloodPressureProcess extends Activity {
             }
 
             long endTime = System.currentTimeMillis();
-            double totalTimeInSecs = (endTime - startTime) / 1000d; //to convert time to seconds
-            if (totalTimeInSecs >= 30) { //when 30 seconds of measuring passes do the following
+            double totalTimeInSecs = (endTime - startTime) / 1000d;
+            if (totalTimeInSecs >= 30) {
 
-                Double[] Green = GreenAvgList.toArray(new Double[GreenAvgList.size()]);
-                Double[] Red = RedAvgList.toArray(new Double[RedAvgList.size()]);
+                Double[] Green = GreenAvgList.toArray(new Double[0]);
+                Double[] Red = RedAvgList.toArray(new Double[0]);
 
-                SamplingFreq = (counter / totalTimeInSecs); //calculating the sampling frequency
+                SamplingFreq = (counter / totalTimeInSecs);
 
-                double HRFreq = Fft.FFT(Green, counter, SamplingFreq); // send the green array and get its fft then return the amount of heartrate per second
+                double HRFreq = Fft.FFT(Green, counter, SamplingFreq);
                 double bpm = (int) ceil(HRFreq * 60);
-                double HR1Freq = Fft.FFT(Red, counter, SamplingFreq);  // send the red array and get its fft then return the amount of heartrate per second
+                double HR1Freq = Fft.FFT(Red, counter, SamplingFreq);
                 double bpm1 = (int) ceil(HR1Freq * 60);
-
-                // The following code is to make sure that if the heartrate from red and green intensities are reasonable
-                // take the average between them, otherwise take the green or red if one of them is good
 
                 if ((bpm > 45 && bpm < 200)) {
                     if ((bpm1 > 45 && bpm1 < 200)) {
@@ -293,9 +296,8 @@ public class BloodPressureProcess extends Activity {
     }
 
     private String getBaseUrl() {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences sharedPreferences = getSharedPreferences("ApiSettings", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("api_base_url", "http://192.168.8.6:8000/api/");
+        return sharedPreferences.getString("api_base_url", "http://192.168.8.12:8000/api/");
     }
 
     private void sendResultsToApi(int sp, int dp, String user) {
@@ -303,22 +305,31 @@ public class BloodPressureProcess extends Activity {
         String endpoint = baseUrl + "vitals/";
 
         new Thread(() -> {
+            HttpURLConnection conn = null;
             try {
                 URL url = new URL(endpoint);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json; utf-8");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setDoOutput(true);
 
+                // Fetch user credentials
+                String[] credentials = Data.getUserCredentials(user); // Implement getUserCredentials in UserDB
+                String userEmail = credentials[0];
+                String userPassword = credentials[1];
+                String auth = "Basic " + Base64.encodeToString((userEmail + ":" + userPassword).getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP);
+                conn.setRequestProperty("Authorization", auth);
+
                 JSONObject jsonParam = new JSONObject();
-                jsonParam.put("systolic_pressure", sp);
-                jsonParam.put("diastolic_pressure", dp);
-                jsonParam.put("user", user);
+                jsonParam.put("blood_pressure", "sp:" + sp + ",dp:" + dp);
+                jsonParam.put("user", userEmail);
+                Log.d(TAG, user);
 
                 try (OutputStream os = conn.getOutputStream()) {
-                    byte[] input = jsonParam.toString().getBytes(StandardCharsets.UTF_8);
-                    os.write(input, 0, input.length);
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));
+                    writer.write(jsonParam.toString());
+                    writer.flush();
                 }
 
                 int responseCode = conn.getResponseCode();
@@ -327,10 +338,12 @@ public class BloodPressureProcess extends Activity {
                 } else {
                     Log.d(TAG, "Failed to send results: " + responseCode);
                 }
-
-                conn.disconnect();
             } catch (Exception e) {
                 Log.e(TAG, "Exception in sending results", e);
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
         }).start();
     }

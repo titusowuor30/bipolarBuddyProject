@@ -1,0 +1,105 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<!-- Kin Profile Section -->
+<section id="kin-profile" class="kin-profile section">
+    <div class="container">
+        <h2>Kin Profile</h2>
+        <div class="row">
+            <!-- Account Details -->
+            <div class="col-md-6">
+                <h3>Account Details</h3>
+                <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Phone:</strong> {{ user.phone }}</p>
+            </div>
+            <!-- Patient Vitals -->
+            <div class="col-md-6">
+                <h3>Patient Vitals</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Heart Rate</th>
+                            <th>Blood Pressure</th>
+                            <th>O2 Saturation</th>
+                            <th>Respiration Rate</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vital in vitals %}
+                        <tr>
+                            <td>{{ vital.patient.user.first_name }} {{ vital.patient.user.last_name }}</td>
+                            <td>{{ vital.heart_rate }}</td>
+                            <td>{{ vital.blood_pressure }}</td>
+                            <td>{{ vital.o2_saturation }}</td>
+                            <td>{{ vital.respiration_rate }}</td>
+                            <td>{{ vital.timestamp }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No vitals recorded</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <!-- Patient Tremors -->
+            <div class="col-md-6">
+                <h3>Patient Tremors</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tremor in tremors %}
+                        <tr>
+                            <td>{{ tremor.patient.user.first_name }} {{ tremor.patient.user.last_name }}</td>
+                            <td>{{ tremor.timestamp }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2">No tremor records</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Patient Prescriptions -->
+            <div class="col-md-6">
+                <h3>Patient Prescriptions</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Medication</th>
+                            <th>Dosage</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prescription in prescriptions %}
+                        <tr>
+                            <td>{{ prescription.patient.user.first_name }} {{ prescription.patient.user.last_name }}</td>
+                            <td>{{ prescription.medication_name }}</td>
+                            <td>{{ prescription.dosage }}</td>
+                            <td>{{ prescription.created_at }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">No prescriptions found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

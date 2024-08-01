@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -17,13 +18,14 @@ import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.yo7a.VitalsTracker.Math.Fft;
+import com.bengohub.VitalsTracker.Math.Fft;
 
 import org.json.JSONObject;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -80,6 +82,9 @@ public class HeartRateProcess extends Activity {
         previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         ProgHeart = findViewById(R.id.HRPB);
         ProgHeart.setProgress(0);
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "VitalsTracker::DoNotDimScreen");
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
@@ -208,11 +213,11 @@ public class HeartRateProcess extends Activity {
                 urlConnection.setRequestProperty("Content-Type", "application/json");
 
                 JSONObject jsonParam = new JSONObject();
-                jsonParam.put("bpm", bpm);
+                jsonParam.put("heart_rate", bpm);
                 jsonParam.put("user", user);
 
                 OutputStream os = urlConnection.getOutputStream();
-                os.write(jsonParam.toString().getBytes("UTF-8"));
+                os.write(jsonParam.toString().getBytes(StandardCharsets.UTF_8));
                 os.close();
 
                 int responseCode = urlConnection.getResponseCode();
