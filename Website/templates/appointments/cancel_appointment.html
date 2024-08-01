@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<!-- Cancel Appointment Section -->
+<section id="cancel-appointment" class="cancel-appointment section">
+    <div class="container">
+        <h2>Cancel Appointment</h2>
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>Appointment Details</h3>
+                        <p><strong>Name:</strong> {{ appointment.user.first_name }} {{appointment.user.last_name}}</p>
+                        <p><strong>Email:</strong> {{ appointment.user.email }}</p>
+                        <p><strong>Phone:</strong> {{ appointment.user.phone }}</p>
+                        <p><strong>Date:</strong> {{ appointment.date }}</p>
+                        <p><strong>Department:</strong> {{ appointment.department }}</p>
+                        <p><strong>Doctor:</strong> {{ appointment.doctor }}</p>
+                        <p><strong>Message:</strong> {{ appointment.message }}</p>
+
+                        <form method="post" action="{% url 'cancel_appointment' appointment.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Cancel Appointment</button>
+                            <a href="{% url 'doctor_profile' %}" class="btn btn-secondary">Back to Profile</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

@@ -18,7 +18,7 @@
  *  Copyright (c) 2016 by Bernd Porr
  */
 
-package com.example.yo7a.VitalsTracker.Math;
+package com.bengohub.VitalsTracker.Math;
 
 /**
  * Abstract form of the a filter which can have different state variables

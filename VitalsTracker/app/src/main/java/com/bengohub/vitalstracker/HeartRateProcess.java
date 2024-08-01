@@ -3,20 +3,29 @@ package com.bengohub.VitalsTracker;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.yo7a.VitalsTracker.Math.Fft;
+import com.bengohub.VitalsTracker.Math.Fft;
 
+import org.json.JSONObject;
+
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -64,7 +73,6 @@ public class HeartRateProcess extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             user = extras.getString("Usr");
-            //The key argument here must match that used in the other activity
         }
 
         // XML - Java Connecting
@@ -75,24 +83,17 @@ public class HeartRateProcess extends Activity {
         ProgHeart = findViewById(R.id.HRPB);
         ProgHeart.setProgress(0);
 
-        // WakeLock Initialization : Forces the phone to stay On
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
-    }
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "VitalsTracker::DoNotDimScreen");
 
-    //Prevent the system from restarting your activity during certain configuration changes,
-    // but receive a callback when the configurations do change, so that you can manually update your activity as necessary.
-    //such as screen orientation, keyboard availability, and language
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
 
-    //Wakelock + Open device camera + set orientation to 90 degree
-    //store system time as a start time for the analyzing process
-    //your activity to start interacting with the user.
-    // This is a good place to begin animations, open exclusive-access devices (such as the camera)
     @Override
     public void onResume() {
         super.onResume();
@@ -102,10 +103,6 @@ public class HeartRateProcess extends Activity {
         startTime = System.currentTimeMillis();
     }
 
-    //call back the frames then release the camera + wakelock and Initialize the camera to null
-    //Called as part of the activity lifecycle when an activity is going into the background, but has not (yet) been killed. The counterpart to onResume().
-    //When activity B is launched in front of activity A,
-    // this callback will be invoked on A. B will not be created until A's onPause() returns, so be sure to not do anything lengthy here.
     @Override
     public void onPause() {
         super.onPause();
@@ -116,39 +113,29 @@ public class HeartRateProcess extends Activity {
         camera = null;
     }
 
-    //getting frames data from the camera and start the heartbeat process
     private final PreviewCallback previewCallback = new PreviewCallback() {
-
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void onPreviewFrame(byte[] data, Camera cam) {
-            //if data or size == null ****
             if (data == null) throw new NullPointerException();
             Camera.Size size = cam.getParameters().getPreviewSize();
             if (size == null) throw new NullPointerException();
 
-            //Atomically sets the value to the given updated value if the current value == the expected value.
             if (!processing.compareAndSet(false, true)) return;
 
-            //put width + height of the camera inside the variables
             int width = size.width;
             int height = size.height;
 
             double GreenAvg;
             double RedAvg;
 
-            GreenAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 3); //1 stands for red intensity, 2 for blue, 3 for green
-            RedAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 1); //1 stands for red intensity, 2 for blue, 3 for green
+            GreenAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 3);
+            RedAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 1);
 
             GreenAvgList.add(GreenAvg);
             RedAvgList.add(RedAvg);
 
-            ++counter; //countes number of frames in 30 seconds
+            ++counter;
 
-
-            //To check if we got a good red intensity to process if not return to the condition and set it again until we get a good red intensity
             if (RedAvg < 200) {
                 inc = 0;
                 ProgP = inc;
@@ -158,25 +145,20 @@ public class HeartRateProcess extends Activity {
             }
 
             long endTime = System.currentTimeMillis();
-            double totalTimeInSecs = (endTime - startTime) / 1000d; //to convert time to seconds
-            if (totalTimeInSecs >= 30) { //when 30 seconds of measuring passes do the following " we chose 30 seconds to take half sample since 60 seconds is normally a full sample of the heart beat
-
+            double totalTimeInSecs = (endTime - startTime) / 1000d;
+            if (totalTimeInSecs >= 30) {
                 Double[] Green = GreenAvgList.toArray(new Double[GreenAvgList.size()]);
                 Double[] Red = RedAvgList.toArray(new Double[RedAvgList.size()]);
 
-                SamplingFreq = (counter / totalTimeInSecs); //calculating the sampling frequency
+                SamplingFreq = (counter / totalTimeInSecs);
 
-                double HRFreq = Fft.FFT(Green, counter, SamplingFreq); // send the green array and get its fft then return the amount of heartrate per second
+                double HRFreq = Fft.FFT(Green, counter, SamplingFreq);
                 double bpm = (int) ceil(HRFreq * 60);
-                double HR1Freq = Fft.FFT(Red, counter, SamplingFreq);  // send the red array and get its fft then return the amount of heartrate per second
+                double HR1Freq = Fft.FFT(Red, counter, SamplingFreq);
                 double bpm1 = (int) ceil(HR1Freq * 60);
-
-                // The following code is to make sure that if the heartrate from red and green intensities are reasonable
-                // take the average between them, otherwise take the green or red if one of them is good
 
                 if ((bpm > 45 || bpm < 200)) {
                     if ((bpm1 > 45 || bpm1 < 200)) {
-
                         bufferAvgB = (bpm + bpm1) / 2;
                     } else {
                         bufferAvgB = bpm;
@@ -185,7 +167,7 @@ public class HeartRateProcess extends Activity {
                     bufferAvgB = bpm1;
                 }
 
-                if (bufferAvgB < 45 || bufferAvgB > 200) { //if the heart beat wasn't reasonable after all reset the progresspag and restart measuring
+                if (bufferAvgB < 45 || bufferAvgB > 200) {
                     inc = 0;
                     ProgP = inc;
                     ProgHeart.setProgress(ProgP);
@@ -198,31 +180,61 @@ public class HeartRateProcess extends Activity {
                 }
 
                 Beats = (int) bufferAvgB;
+
+                if (Beats != 0) {
+                    sendHeartRateResult(Beats, user);
+                    Intent i = new Intent(HeartRateProcess.this, HeartRateResult.class);
+                    i.putExtra("bpm", Beats);
+                    i.putExtra("Usr", user);
+                    startActivity(i);
+                    finish();
+                }
             }
 
-            if (Beats != 0) { //if beasts were reasonable stop the loop and send HR with the username to results activity and finish this activity
-                Intent i = new Intent(HeartRateProcess.this, HeartRateResult.class);
-                i.putExtra("bpm", Beats);
-                i.putExtra("Usr", user);
-                startActivity(i);
-                finish();
-            }
-
-
-            if (RedAvg != 0) { //increment the progresspar
-
+            if (RedAvg != 0) {
                 ProgP = inc++ / 34;
                 ProgHeart.setProgress(ProgP);
             }
 
-            //keeps taking frames tell 30 seconds
             processing.set(false);
-
         }
     };
 
-    private final SurfaceHolder.Callback surfaceCallback = new SurfaceHolder.Callback() {
+    private void sendHeartRateResult(int bpm, String user) {
+        new Thread(() -> {
+            try {
+                SharedPreferences sharedPreferences = getSharedPreferences("ApiSettings", Context.MODE_PRIVATE);
+                String baseUrl = sharedPreferences.getString("api_base_url", "http://192.168.8.12:8000/api/");
+                URL url = new URL(baseUrl + "vitals/");
 
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("heart_rate", bpm);
+                jsonParam.put("user", user);
+
+                OutputStream os = urlConnection.getOutputStream();
+                os.write(jsonParam.toString().getBytes(StandardCharsets.UTF_8));
+                os.close();
+
+                int responseCode = urlConnection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    Log.d(TAG, "Data sent successfully");
+                } else {
+                    Log.e(TAG, "Error in sending data: " + responseCode);
+                }
+
+                urlConnection.disconnect();
+            } catch (Exception e) {
+                Log.e(TAG, "Error in sending heart rate result", e);
+            }
+        }).start();
+    }
+
+    private final SurfaceHolder.Callback surfaceCallback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             try {
@@ -235,7 +247,6 @@ public class HeartRateProcess extends Activity {
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
             Camera.Parameters parameters = camera.getParameters();
             parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
 
@@ -248,7 +259,6 @@ public class HeartRateProcess extends Activity {
             camera.setParameters(parameters);
             camera.startPreview();
         }
-
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {

@@ -1,23 +1,28 @@
 package com.bengohub.VitalsTracker;
 
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.hardware.Camera;
-import android.hardware.Camera.PreviewCallback;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
+import android.util.Base64;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.yo7a.VitalsTracker.Math.Fft;
+import com.bengohub.VitalsTracker.Math.Fft;
 
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -26,42 +31,31 @@ import static java.lang.Math.sqrt;
 
 public class O2Process extends Activity {
 
-    // Variables Initialization
     private static final String TAG = "HeartRateMonitor";
     private static final AtomicBoolean processing = new AtomicBoolean(false);
     private SurfaceView preview = null;
     private static SurfaceHolder previewHolder = null;
     private static Camera camera = null;
-    private static WakeLock wakeLock = null;
+    private static PowerManager.WakeLock wakeLock = null;
 
-    //Toast
     private Toast mainToast;
-
-    // DataBase
     public String user;
+    UserDB Data = new UserDB(this); // Initialize UserDB
 
-    //ProgressBar
     private ProgressBar ProgO2;
     public int ProgP = 0;
     public int inc = 0;
-
-    //Freq + timer variable
     private static long startTime = 0;
     private double SamplingFreq;
-
-    // SPO2 variables
     private static final double RedBlueRatio = 0;
     double Stdr = 0;
     double Stdb = 0;
     double sumred = 0;
     double sumblue = 0;
     public int o2;
-
-    //Arraylist
-    public ArrayList<Double> RedAvgList = new ArrayList<Double>();
-    public ArrayList<Double> BlueAvgList = new ArrayList<Double>();
+    public ArrayList<Double> RedAvgList = new ArrayList<>();
+    public ArrayList<Double> BlueAvgList = new ArrayList<>();
     public int counter = 0;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -71,55 +65,38 @@ public class O2Process extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             user = extras.getString("Usr");
-            //The key argument here must match that used in the other activity
         }
 
-        // XML - Java Connecting
         preview = findViewById(R.id.preview);
         previewHolder = preview.getHolder();
         previewHolder.addCallback(surfaceCallback);
         previewHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-
         ProgO2 = findViewById(R.id.O2PB);
         ProgO2.setProgress(0);
 
-        // WakeLock Initialization : Forces the phone to stay On
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
-    }
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "VitalsTracker::DoNotDimScreen");
 
-    //Prevent the system from restarting your activity during certain configuration changes,
-    // but receive a callback when the configurations do change, so that you can manually update your activity as necessary.
-    //such as screen orientation, keyboard availability, and language
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
 
-
-    //Wakelock + Open device camera + set orientation to 90 degree
-    //store system time as a start time for the analyzing process
-    //your activity to start interacting with the user.
-    // This is a good place to begin animations, open exclusive-access devices (such as the camera)
     @Override
     public void onResume() {
         super.onResume();
 
-        wakeLock.acquire();
+        wakeLock.acquire(10 * 60 * 1000L /*10 minutes*/);
 
         camera = Camera.open();
-
         camera.setDisplayOrientation(90);
-
         startTime = System.currentTimeMillis();
     }
 
-    //call back the frames then release the camera + wakelock and Initialize the camera to null
-    //Called as part of the activity lifecycle when an activity is going into the background, but has not (yet) been killed. The counterpart to onResume().
-    //When activity B is launched in front of activity A,
-    // this callback will be invoked on A. B will not be created until A's onPause() returns, so be sure to not do anything lengthy here.
     @Override
     public void onPause() {
         super.onPause();
@@ -130,39 +107,31 @@ public class O2Process extends Activity {
         camera = null;
     }
 
-    //getting frames data from the camera and start the heartbeat process
-    private final PreviewCallback previewCallback = new PreviewCallback() {
+    private final Camera.PreviewCallback previewCallback = new Camera.PreviewCallback() {
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void onPreviewFrame(byte[] data, Camera cam) {
-            //if data or size == null ****
             if (data == null) throw new NullPointerException();
             Camera.Size size = cam.getParameters().getPreviewSize();
             if (size == null) throw new NullPointerException();
 
-            //Atomically sets the value to the given updated value if the current value == the expected value.
             if (!processing.compareAndSet(false, true)) return;
 
-            //put width + height of the camera inside the variables
             int width = size.width;
             int height = size.height;
             double RedAvg;
             double BlueAvg;
 
-            RedAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 1); //1 stands for red intensity, 2 for blue, 3 for green
+            RedAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 1);
             sumred = sumred + RedAvg;
-            BlueAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 2); //1 stands for red intensity, 2 for blue, 3 for green
+            BlueAvg = ImageProcessing.decodeYUV420SPtoRedBlueGreenAvg(data.clone(), height, width, 2);
             sumblue = sumblue + BlueAvg;
 
             RedAvgList.add(RedAvg);
             BlueAvgList.add(BlueAvg);
 
-            ++counter; //countes number of frames in 30 seconds
+            ++counter;
 
-            //To check if we got a good red intensity to process if not return to the condition and set it again until we get a good red intensity
             if (RedAvg < 200) {
                 inc = 0;
                 ProgP = inc;
@@ -171,13 +140,12 @@ public class O2Process extends Activity {
             }
 
             long endTime = System.currentTimeMillis();
-            double totalTimeInSecs = (endTime - startTime) / 1000d; //to convert time to seconds
-            if (totalTimeInSecs >= 30) { //when 30 seconds of measuring passes do the following " we chose 30 seconds to take half sample since 60 seconds is normally a full sample of the heart beat
-
+            double totalTimeInSecs = (endTime - startTime) / 1000d;
+            if (totalTimeInSecs >= 30) {
                 startTime = System.currentTimeMillis();
                 SamplingFreq = (counter / totalTimeInSecs);
-                Double[] Red = RedAvgList.toArray(new Double[RedAvgList.size()]);
-                Double[] Blue = BlueAvgList.toArray(new Double[BlueAvgList.size()]);
+                Double[] Red = RedAvgList.toArray(new Double[0]);
+                Double[] Blue = BlueAvgList.toArray(new Double[0]);
                 double HRFreq = Fft.FFT(Red, counter, SamplingFreq);
                 double bpm = (int) ceil(HRFreq * 60);
 
@@ -185,22 +153,16 @@ public class O2Process extends Activity {
                 double meanb = sumblue / counter;
 
                 for (int i = 0; i < counter - 1; i++) {
-
                     Double bufferb = Blue[i];
-
                     Stdb = Stdb + ((bufferb - meanb) * (bufferb - meanb));
-
                     Double bufferr = Red[i];
-
                     Stdr = Stdr + ((bufferr - meanr) * (bufferr - meanr));
-
                 }
 
                 double varr = sqrt(Stdr / (counter - 1));
                 double varb = sqrt(Stdb / (counter - 1));
 
                 double R = (varr / meanr) / (varb / meanb);
-
                 double spo2 = 100 - 5 * (R);
                 o2 = (int) (spo2);
 
@@ -216,6 +178,8 @@ public class O2Process extends Activity {
                     return;
                 }
 
+                // Send the results to the API
+                new SendResultsTask(o2, bpm, user).execute();
             }
 
             if (o2 != 0) {
@@ -232,13 +196,75 @@ public class O2Process extends Activity {
             }
 
             processing.set(false);
-
         }
     };
 
+    private class SendResultsTask extends AsyncTask<Void, Void, Boolean> {
+        private int o2;
+        private double bpm;
+        private String username;
+
+        SendResultsTask(int o2, double bpm, String username) {
+            this.o2 = o2;
+            this.bpm = bpm;
+            this.username = username;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            // Get user credentials from the database
+            String[] credentials = Data.getUserCredentials(username); // Ensure this method returns an array with email and password
+            if (credentials == null || credentials.length < 2) {
+                Log.e(TAG, "Failed to retrieve user credentials.");
+                return false;
+            }
+            String email = credentials[0];
+            String password = credentials[1];
+
+            SharedPreferences sharedPreferences = getSharedPreferences("ApiSettings", Context.MODE_PRIVATE);
+            String baseUrl = sharedPreferences.getString("api_base_url", "http://192.168.8.12:8000/api/");
+
+            HttpURLConnection urlConnection = null;
+            try {
+                URL url = new URL(baseUrl + "vitals/"); // Ensure the correct endpoint
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+
+                String authcredentials = email + ":" + password;
+                String basicAuth = "Basic " + Base64.encodeToString(authcredentials.getBytes(), Base64.NO_WRAP);
+                urlConnection.setRequestProperty("Authorization", basicAuth);
+
+                String json = String.format("{\"user\":\"%s\",\"o2_saturation\":%d}", email, o2);
+                byte[] outputInBytes = json.getBytes(StandardCharsets.UTF_8);
+                OutputStream os = urlConnection.getOutputStream();
+                os.write(outputInBytes);
+                os.close();
+
+                int responseCode = urlConnection.getResponseCode();
+                return responseCode == 200;
+
+            } catch (Exception e) {
+                Log.e(TAG, "API request failed: " + e.getMessage(), e);
+                return false;
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            if (success) {
+                Toast.makeText(O2Process.this, "Results sent successfully", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(O2Process.this, "Failed to send results", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private final SurfaceHolder.Callback surfaceCallback = new SurfaceHolder.Callback() {
-
-
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             try {
@@ -249,13 +275,10 @@ public class O2Process extends Activity {
             }
         }
 
-
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
             Camera.Parameters parameters = camera.getParameters();
             parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-
 
             Camera.Size size = getSmallestPreviewSize(width, height, parameters);
             if (size != null) {
@@ -266,7 +289,6 @@ public class O2Process extends Activity {
             camera.setParameters(parameters);
             camera.startPreview();
         }
-
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {

@@ -40,7 +40,7 @@ public class First extends AppCompatActivity {
 
 
         if (saveLogin) {
-            ed1.setText(loginPreferences.getString("username", ""));
+            ed1.setText(loginPreferences.getString("email", ""));
             ed2.setText(loginPreferences.getString("password", ""));
             chkRememberMe.setChecked(true);
         }
@@ -52,7 +52,7 @@ public class First extends AppCompatActivity {
 
 
             if (usrStr.length() < 3 || usrStr.length() > 20) {
-                mainToast = Toast.makeText(getApplicationContext(), "Username length must be between 3-20 characters", Toast.LENGTH_SHORT);
+                mainToast = Toast.makeText(getApplicationContext(), "email length must be between 3-20 characters", Toast.LENGTH_SHORT);
                 mainToast.show();
             }
 
@@ -67,7 +67,7 @@ public class First extends AppCompatActivity {
                 if (passStr.equals(checkpassStr)) {
                     if (chkRememberMe.isChecked()) {
                         loginPrefsEditor.putBoolean("saveLogin", true);
-                        loginPrefsEditor.putString("username", usrStr);
+                        loginPrefsEditor.putString("email", usrStr);
                         loginPrefsEditor.putString("password", passStr);
                         loginPrefsEditor.apply();
                     } else {
@@ -82,7 +82,7 @@ public class First extends AppCompatActivity {
 
                 } else {
                     //Toast something
-                    mainToast = Toast.makeText(getApplicationContext(), "Username/Password is incorrect", Toast.LENGTH_SHORT);
+                    mainToast = Toast.makeText(getApplicationContext(), "Email/Password is incorrect", Toast.LENGTH_SHORT);
                     mainToast.show();
                 }
             }

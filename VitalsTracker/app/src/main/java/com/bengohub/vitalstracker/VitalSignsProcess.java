@@ -8,13 +8,14 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.yo7a.VitalsTracker.Math.Fft;
-import com.example.yo7a.VitalsTracker.Math.Fft2;
+import com.bengohub.VitalsTracker.Math.Fft;
+import com.bengohub.VitalsTracker.Math.Fft2;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -105,7 +106,9 @@ public class VitalSignsProcess extends AppCompatActivity {
 
         // WakeLock Initialization : Forces the phone to stay On
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "DoNotDimScreen");
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "VitalsTracker::DoNotDimScreen");
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     //Prevent the system from restarting your activity during certain configuration changes,

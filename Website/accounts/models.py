@@ -40,8 +40,9 @@ class CustomUser(AbstractUser):
     )
     gender = models.CharField(max_length=10, choices=GENDER, default='Other')
     phone = models.CharField(max_length=15, blank=True, null=True)
-    dob = models.DateField(blank=True, null=True)
-    national_id = models.CharField(max_length=8, unique=True, blank=True, null=True)
+    age = models.IntegerField(default=18,blank=True, null=True)
+    height = models.IntegerField(max_length=8, blank=True, null=True)
+    weight = models.IntegerField(max_length=8,blank=True, null=True)
 
     objects = CustomUserManager()
 
@@ -50,11 +51,23 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+    
+class Departments(models.Model):
+    name=models.CharField(max_length=255)
+    short_description=models.CharField(max_length=255)
+    description=models.TextField()
+
+    class Meta:
+        verbose_name_plural='Departments'
+
+    def __str__(self):
+        return self.name
+    
 
 class Doctor(models.Model):
     SPECIALIZATIONS=[("Pyschiatrist","Pyschiatrist"), ("Clinical Pyschologist","Clinical Pyschologist")]
+    department=models.ForeignKey(Departments,on_delete=models.SET_NULL,null=True,blank=True,related_name='doctors')
     user=models.OneToOneField("CustomUser",on_delete=models.CASCADE)
-    #contact_info=models.ManyToManyField("ContactInfo", blank=True, null=True)
     specialization=models.CharField(max_length=50, choices=SPECIALIZATIONS)
 
     def __str__(self):

@@ -2,9 +2,13 @@ package com.bengohub.VitalsTracker;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.util.Patterns;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -17,11 +21,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 public class Login extends AppCompatActivity {
 
-    public ImageButton Log;
+    public ImageButton LoginButton;
     public EditText ed1, ed2, ed3, ed4, ed5, ed6, ed7, ed8;
     private Toast mainToast;
     public Spinner GenderSpin;
@@ -34,27 +47,12 @@ public class Login extends AppCompatActivity {
     int c, y = 0;
     int check1 = 0;
 
-    //Camera Permission
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-
-            }
-        }
-    }
-
-    //Password Pattern
     private static final Pattern PASSWORD_PATTERN =
             Pattern.compile("^" +
-                    //"(?=.*[0-9])" +         //at least 1 digit
-                    //"(?=.*[a-z])" +         //at least 1 lower case letter
-                    //"(?=.*[A-Z])" +         //at least 1 upper case letter
-                    "(?=.*[a-zA-Z])" +      //any letter
-                    "(?=.*[@#$%^&+=])" +    //at least 1 special character
-                    "(?=\\S+$)" +           //no white spaces
-                    ".{4,}" +               //at least 4 characters
+                    "(?=.*[a-zA-Z])" +
+                    "(?=.*[@#$%^&+=])" +
+                    "(?=\\S+$)" +
+                    ".{4,}" +
                     "$");
 
     @Override
@@ -62,12 +60,11 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        //Checking for camera
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
         }
 
-        Log = findViewById(R.id.Login);
+        LoginButton = findViewById(R.id.Login);
         ed1 = findViewById(R.id.edth);
         ed2 = findViewById(R.id.edtw);
         ed3 = findViewById(R.id.edtn);
@@ -78,15 +75,12 @@ public class Login extends AppCompatActivity {
         ed8 = findViewById(R.id.edte);
         GenderSpin = findViewById(R.id.SGender);
 
-
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this, R.array.Gender, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         GenderSpin.setAdapter(adapter);
 
-
-        Log.setOnClickListener(v -> {
-
+        LoginButton.setOnClickListener(v -> {
             check1 = 0;
             heightStr = ed1.getText().toString();
             weightStr = ed2.getText().toString();
@@ -98,8 +92,7 @@ public class Login extends AppCompatActivity {
             emailStr = ed8.getText().toString();
             usrStr = usrStrlow.toLowerCase();
 
-
-            //Email Validation
+            // Email Validation
             String emailInput = emailStr;
             if (emailInput.isEmpty()) {
                 check1 = 1;
@@ -114,7 +107,7 @@ public class Login extends AppCompatActivity {
                 }
             }
 
-            //Username Validation
+            // Username Validation
             if (usrStr.isEmpty()) {
                 ed5.setError("Field can't be empty");
                 check1 = 1;
@@ -125,14 +118,14 @@ public class Login extends AppCompatActivity {
                 ed5.setError(null);
                 check1 = 0;
             }
-            c = check.checkUser(usrStr); //will check if username exists will return 0 otherwise it will be 1
+            c = check.checkUser(usrStr);
             if (c == y) {
                 check1 = 1;
-                mainToast = Toast.makeText(getApplicationContext(), "Username already exist", Toast.LENGTH_SHORT);
+                mainToast = Toast.makeText(getApplicationContext(), "Username already exists", Toast.LENGTH_SHORT);
                 mainToast.show();
             }
 
-            //Password Validation
+            // Password Validation
             if (passStr.isEmpty()) {
                 check1 = 1;
                 ed6.setError("Field can't be empty");
@@ -146,19 +139,18 @@ public class Login extends AppCompatActivity {
                 check1 = 0;
                 ed6.setError(null);
             }
-            if (!(passStr.equals(passConStr))) {
+            if (!passStr.equals(passConStr)) {
                 check1 = 1;
-                mainToast = Toast.makeText(getApplicationContext(), "Password don't match !", Toast.LENGTH_SHORT);
+                mainToast = Toast.makeText(getApplicationContext(), "Password don't match!", Toast.LENGTH_SHORT);
                 mainToast.show();
             }
 
-            //Checking other Inputs
+            // Checking other Inputs
             if (ageStr.isEmpty() || nameStr.isEmpty() || heightStr.isEmpty() || weightStr.isEmpty() || passStr.isEmpty() || passConStr.isEmpty() || emailStr.isEmpty() || usrStr.isEmpty()) {
                 check1 = 1;
-                mainToast = Toast.makeText(getApplicationContext(), "Please fill all your data ", Toast.LENGTH_SHORT);
+                mainToast = Toast.makeText(getApplicationContext(), "Please fill all your data", Toast.LENGTH_SHORT);
                 mainToast.show();
             } else if (check1 == 0) {
-
                 check1 = 0;
                 age = Integer.parseInt(ageStr);
                 weight = Integer.parseInt(weightStr);
@@ -166,10 +158,8 @@ public class Login extends AppCompatActivity {
                 String text = GenderSpin.getSelectedItem().toString();
                 int k = 0;
 
-                if (text.equals(m1)) //If gender is male K = 1
-                    k = 1;
-                if (text.equals(m2)) //If gender is female K = 2
-                    k = 2;
+                if (text.equals(m1)) k = 1;
+                if (text.equals(m2)) k = 2;
 
                 user per = new user();
                 per.setUsername(usrStr);
@@ -181,15 +171,85 @@ public class Login extends AppCompatActivity {
                 per.setweight(weight);
                 per.setgender(k);
                 Data.addUser(per);
+
+                // Retrieve API base URL from SharedPreferences
+                SharedPreferences sharedPreferences = getSharedPreferences("ApiSettings", MODE_PRIVATE);
+                String apiBaseUrl = sharedPreferences.getString("api_base_url", "http://192.168.8.12:8000/api/");
+
+                // Post user details to API
+                postUserDetailsToApi(apiBaseUrl, per);
+
                 Intent i = new Intent(v.getContext(), First.class);
                 mainToast = Toast.makeText(getApplicationContext(), "Your account has been created", Toast.LENGTH_SHORT);
                 mainToast.show();
                 startActivity(i);
                 finish();
-
             }
-
         });
     }
-}
 
+    private void postUserDetailsToApi(String apiBaseUrl, user user) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(apiBaseUrl + "patients/signup/");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setDoOutput(true);
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("username", user.getUsername());
+                jsonParam.put("first_name", user.getname().split(" ")[0]);
+                jsonParam.put("last_name", user.getname().split(" ")[1]);
+                jsonParam.put("phone", "+2547xxxxxxxx");
+                jsonParam.put("age", user.getage());
+                jsonParam.put("email", user.getemail());
+                jsonParam.put("password", user.getPass());
+                jsonParam.put("height", user.getheight());
+                jsonParam.put("weight", user.getweight());
+                jsonParam.put("gender", user.getgender());
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonParam.toString().getBytes(StandardCharsets.UTF_8);
+                    os.write(input, 0, input.length);
+                }
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_CREATED) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    StringBuilder response = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    Log.i("Login", "Response: " + response.toString());
+
+                    // Success
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(getApplicationContext(), "User created successfully on server", Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                    String inputLine;
+                    StringBuilder response = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    Log.e("Login", "Response code: " + responseCode + ", Response: " + response.toString());
+
+                    // Failure
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Toast.makeText(getApplicationContext(), "Failed to create user on server", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            } catch (JSONException e) {
+                Log.e("Login", "JSON Exception: " + e.getMessage());
+            } catch (Exception e) {
+                Log.e("Login", "Exception: " + e.getMessage());
+            }
+        }).start();
+    }
+}

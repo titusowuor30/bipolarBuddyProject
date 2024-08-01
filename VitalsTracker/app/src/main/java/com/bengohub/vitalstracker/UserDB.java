@@ -278,4 +278,24 @@ public class UserDB extends SQLiteOpenHelper {
         db.execSQL(query);
         this.db = db;
     }
+
+    // Method to fetch user credentials (email and password) by username
+    public String[] getUserCredentials(String username) {
+        db = this.getReadableDatabase();
+        String[] credentials = new String[2]; // email and password
+
+        String query = "SELECT email, password FROM users WHERE username = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{username});
+
+        if (cursor.moveToFirst()) {
+            credentials[0] = cursor.getString(cursor.getColumnIndex("email"));
+            credentials[1] = cursor.getString(cursor.getColumnIndex("password"));
+        } else {
+            credentials = null; // If user not found, return null
+        }
+
+        cursor.close();
+        db.close();
+        return credentials;
+    }
 }
