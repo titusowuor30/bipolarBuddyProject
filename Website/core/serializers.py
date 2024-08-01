@@ -15,22 +15,18 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 class TremorsSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(write_only=True)
-    timestamp = serializers.DateTimeField()
 
     class Meta:
         model = Tremors
-        fields = ['user_email', 'timestamp']
+        fields = ['user_email',]
 
     def create(self, validated_data):
         user_email = validated_data.pop('user_email')
-        timestamp = validated_data.pop('timestamp')
-
-        # Retrieve or create Patient based on user_email
         try:
             patient = Patient.objects.get(Q(user__email=user_email) | Q(user__username=user_email))
-        except Patient.DoesNotExist:
+        except Patient.DoesNotExist as e:
+            print(e)
             raise serializers.ValidationError("Patient with this email does not exist.")
 
-        # Create the Tremors entry
-        tremor = Tremors.objects.create(patient=patient, timestamp=timestamp)
+        tremor = Tremors.objects.create(patient=patient)
         return tremor

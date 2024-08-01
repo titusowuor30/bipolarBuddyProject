@@ -97,7 +97,7 @@ public class ShakeService extends Service implements SensorEventListener {
             }
             lastShakeTime = now;
 
-            sendShakeDataToApi(user, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
+            sendShakeDataToApi(user);
         }
     }
 
@@ -121,14 +121,14 @@ public class ShakeService extends Service implements SensorEventListener {
         }
     }
 
-    private void sendShakeDataToApi(String user, String datetime) {
+    private void sendShakeDataToApi(String user) {
         SharedPreferences sharedPreferences = getSharedPreferences("ApiSettings", Context.MODE_PRIVATE);
         String baseUrl = sharedPreferences.getString("api_base_url", "http://192.168.8.12:8000/api/"); // Replace with default URL if not set
 
         OkHttpClient client = new OkHttpClient();
         MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
-        String json = String.format("{\"user_email\":\"%s\",\"timestamp\":\"%s\"}", user, datetime);
+        String json = String.format("{\"user_email\":\"%s\"}", user);
         RequestBody body = RequestBody.create(json, JSON);
         Request request = new Request.Builder()
                 .url(baseUrl + "tremors/") // Update with the correct endpoint
