@@ -3,49 +3,103 @@
 
 {% block content %}
 <main class="main">
-     <!-- Departments Section -->
-     <section id="departments" class="departments section">
+  <!-- Departments Section -->
+  <section id="departments" class="departments section">
 
-        <!-- Section Title -->
-        <div class="container section-title" data-aos="fade-up">
-          <h2>Departments</h2>
-          <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
-        </div><!-- End Section Title -->
-  
-        <div class="container" data-aos="fade-up" data-aos-delay="100">
-  
-          <div class="row">
-            <div class="col-lg-3">
-              <ul class="nav nav-tabs flex-column">
-                {% for dept in departments %}
-                <li class="nav-item">
-                  <a class="nav-link {% if dept.id == departments.first.id %} active show {% endif %}" data-bs-toggle="tab" href="#departments-tab-{{dept.id}}">{{dept.name}}</a>
-                </li>
-                {% endfor %}
-              </ul>
-            </div>
-            <div class="col-lg-9 mt-4 mt-lg-0">
-              <div class="tab-content">
-                {% for d in departments %}
-                <div class="tab-pane {% if d.id == departments.first.id %} active show {% endif %}" id="departments-tab-{{d.id}}">
-                  <div class="row">
-                    <div class="col-lg-8 details order-2 order-lg-1">
-                      <h3>{{d.short_description}}</h3>
-                      <p class="fst-italic">{{d.description}}</p>
-                    </div>
-                    <div class="col-lg-4 text-center order-1 order-lg-2">
-                      <img src="assets/img/departments-1.jpg" alt="" class="img-fluid">
-                    </div>
-                  </div>
+    <!-- Section Title -->
+    <div class="container section-title" data-aos="fade-up">
+      <h2>Departments</h2>
+      <p>Explore the various departments and teams dedicated to supporting individuals with bipolar disorder and their families.</p>
+    </div><!-- End Section Title -->
+
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+      <div class="row">
+        <div class="col-lg-3">
+          <ul class="nav nav-tabs flex-column">
+            <li class="nav-item">
+              <a class="nav-link active show" data-bs-toggle="tab" href="#departments-tab-1">Clinical Services</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#departments-tab-2">Therapeutic Support</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#departments-tab-3">Patient Education</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#departments-tab-4">Research and Development</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#departments-tab-5">Community Outreach</a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-9 mt-4 mt-lg-0">
+          <div class="tab-content">
+            <div class="tab-pane active show" id="departments-tab-1">
+              <div class="row">
+                <div class="col-lg-8 details order-2 order-lg-1">
+                  <h3>Clinical Services</h3>
+                  <p class="fst-italic">Our Clinical Services team provides comprehensive psychiatric evaluations, medication management, and ongoing care for individuals with bipolar disorder.</p>
                 </div>
-                {% endfor %}
+                <div class="col-lg-4 text-center order-1 order-lg-2">
+                  <img src="https://via.placeholder.com/500x300" alt="Clinical Services" class="img-fluid">
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane" id="departments-tab-2">
+              <div class="row">
+                <div class="col-lg-8 details order-2 order-lg-1">
+                  <h3>Therapeutic Support</h3>
+                  <p class="fst-italic">Our Therapeutic Support team offers counseling, therapy sessions, and support groups designed to help manage the emotional and psychological aspects of bipolar disorder.</p>
+                </div>
+                <div class="col-lg-4 text-center order-1 order-lg-2">
+                  <img src="https://via.placeholder.com/500x300" alt="Therapeutic Support" class="img-fluid">
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane" id="departments-tab-3">
+              <div class="row">
+                <div class="col-lg-8 details order-2 order-lg-1">
+                  <h3>Patient Education</h3>
+                  <p class="fst-italic">Our Patient Education team focuses on providing valuable resources, workshops, and materials to educate patients and their families about bipolar disorder.</p>
+                </div>
+                <div class="col-lg-4 text-center order-1 order-lg-2">
+                  <img src="https://via.placeholder.com/500x300" alt="Patient Education" class="img-fluid">
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane" id="departments-tab-4">
+              <div class="row">
+                <div class="col-lg-8 details order-2 order-lg-1">
+                  <h3>Research and Development</h3>
+                  <p class="fst-italic">Our Research and Development department works on advancing treatment options, studying new therapies, and improving the overall management of bipolar disorder.</p>
+                </div>
+                <div class="col-lg-4 text-center order-1 order-lg-2">
+                  <img src="https://via.placeholder.com/500x300" alt="Research and Development" class="img-fluid">
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane" id="departments-tab-5">
+              <div class="row">
+                <div class="col-lg-8 details order-2 order-lg-1">
+                  <h3>Community Outreach</h3>
+                  <p class="fst-italic">Our Community Outreach team engages with the broader community to raise awareness, reduce stigma, and provide support to those affected by bipolar disorder.</p>
+                </div>
+                <div class="col-lg-4 text-center order-1 order-lg-2">
+                  <img src="https://via.placeholder.com/500x300" alt="Community Outreach" class="img-fluid">
+                </div>
               </div>
             </div>
           </div>
-  
         </div>
-  
-      </section><!-- /Departments Section -->
-  
-  </main>
+      </div>
+
+    </div>
+
+  </section><!-- /Departments Section -->
+
+</main>
+
+
 {% endblock content %}
