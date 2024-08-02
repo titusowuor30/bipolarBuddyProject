@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load static %}
 {% block content %} 
     <!-- Doctors Section -->
     <section id="doctors" class="doctors section">
@@ -12,14 +13,14 @@
       <div class="container">
   
         <div class="row gy-4">
-  
+          {% for doc in doctors %}
           <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
             <div class="team-member d-flex align-items-start">
-              <div class="pic"><img src="assets/img/doctors/dr-njeri-mwangi.jpg" class="img-fluid" alt="Dr. Njeri Mwangi"></div>
+              <div class="pic"><img src="{{doc.user.pic.url}}" class="img-fluid" alt="Dr. Njeri Mwangi"></div>
               <div class="member-info">
-                <h4>Dr. Njeri Mwangi</h4>
-                <span>Consultant Psychiatrist</span>
-                <p>Dr. Njeri Mwangi specializes in bipolar disorder and provides comprehensive psychiatric evaluations and treatment plans tailored to individual needs.</p>
+                <h4>Dr. {{doc.user.last_name}} {{doc.user.first_name}}</h4>
+                <span>{{doc.specialization}}</span>
+                <p>{{doc.user.biography}}</p>
                 <div class="social">
                   <a href=""><i class="bi bi-twitter"></i></a>
                   <a href=""><i class="bi bi-facebook"></i></a>
@@ -29,58 +30,8 @@
               </div>
             </div>
           </div><!-- End Team Member -->
-  
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
-            <div class="team-member d-flex align-items-start">
-              <div class="pic"><img src="assets/img/doctors/dr-samuel-otieno.jpg" class="img-fluid" alt="Dr. Samuel Otieno"></div>
-              <div class="member-info">
-                <h4>Dr. Samuel Otieno</h4>
-                <span>Clinical Psychologist</span>
-                <p>Dr. Samuel Otieno offers therapy and counseling services for individuals experiencing bipolar disorder, focusing on cognitive-behavioral techniques and emotional support.</p>
-                <div class="social">
-                  <a href=""><i class="bi bi-twitter"></i></a>
-                  <a href=""><i class="bi bi-facebook"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                  <a href=""><i class="bi bi-linkedin"></i></a>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Team Member -->
-  
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="team-member d-flex align-items-start">
-              <div class="pic"><img src="assets/img/doctors/dr-amani-kiptoo.jpg" class="img-fluid" alt="Dr. Amani Kiptoo"></div>
-              <div class="member-info">
-                <h4>Dr. Amani Kiptoo</h4>
-                <span>Neuropsychiatrist</span>
-                <p>Dr. Amani Kiptoo specializes in the intersection of neurology and psychiatry, providing advanced treatment options for bipolar disorder with a focus on brain function and mental health.</p>
-                <div class="social">
-                  <a href=""><i class="bi bi-twitter"></i></a>
-                  <a href=""><i class="bi bi-facebook"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                  <a href=""><i class="bi bi-linkedin"></i></a>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Team Member -->
-  
-          <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
-            <div class="team-member d-flex align-items-start">
-              <div class="pic"><img src="assets/img/doctors/dr-aisha-hassan.jpg" class="img-fluid" alt="Dr. Aisha Hassan"></div>
-              <div class="member-info">
-                <h4>Dr. Aisha Hassan</h4>
-                <span>Child and Adolescent Psychiatrist</span>
-                <p>Dr. Aisha Hassan provides specialized care for young patients with bipolar disorder, focusing on developmental considerations and family involvement.</p>
-                <div class="social">
-                  <a href=""><i class="bi bi-twitter"></i></a>
-                  <a href=""><i class="bi bi-facebook"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                  <a href=""><i class="bi bi-linkedin"></i></a>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Team Member -->
-  
+          {% endfor %}
+
         </div>
   
       </div>

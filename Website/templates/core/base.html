@@ -32,7 +32,7 @@
   <link href="{% static 'assets/css/forms.css' %}" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="P:\python_projects\bipolarBuddyProject\Website\templates\core\styles.css">
+  <link rel="stylesheet" href="">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 </head>
@@ -81,8 +81,6 @@
                         <li><a href="{% url 'patient_profile' %}">Profile</a></li>
                     {% elif user.patientkin %}
                         <li><a href="{% url 'patient_kin_profile' %}">Profile</a></li>
-                    {% else %}
-                        <li><a href="{% url 'user_profile' %}">Profile</a></li>
                     {% endif %}
                 {% else %}
                     <li><a href="{% url 'login' %}">Login</a></li>

@@ -20,7 +20,8 @@ from core.models import *
 from .serializers import *
 
 def doctors(request):
-    return render(request,'accounts/doctors.html')
+    docts=Doctor.objects.all()
+    return render(request,'accounts/doctors.html',{"doctors": docts})
 
 #android login endpoint
 class LoginAPIView(APIView):

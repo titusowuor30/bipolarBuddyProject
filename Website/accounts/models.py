@@ -43,7 +43,8 @@ class CustomUser(AbstractUser):
     age = models.IntegerField(default=18,blank=True, null=True)
     height = models.IntegerField(max_length=8, blank=True, null=True)
     weight = models.IntegerField(max_length=8,blank=True, null=True)
-
+    biography = models.TextField(blank=True, null=True)
+    pic = models.ImageField(upload_to="profile_pics", blank=True, null=True)
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
