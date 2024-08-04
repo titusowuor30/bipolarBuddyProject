@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
-import com.bengohub.VitalsTracker.R;
 
 import android.widget.ImageButton;
 
@@ -17,7 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.bengohub.VitalsTracker.Settings.ReminderActivity;
+import com.bengohub.VitalsTracker.Settings.AddReminderActivity;
 import com.bengohub.VitalsTracker.Settings.SettingsActivity;
 import com.google.android.material.navigation.NavigationView;
 
@@ -131,7 +130,7 @@ public class Primary extends AppCompatActivity implements NavigationView.OnNavig
             startActivity(settingsIntent);
         } else if (id == R.id.nav_reminders) {
             // Handle the reminders navigation
-            Intent remindersIntent = new Intent(this, ReminderActivity.class);
+            Intent remindersIntent = new Intent(this, AddReminderActivity.class);
             startActivity(remindersIntent);
         }
 

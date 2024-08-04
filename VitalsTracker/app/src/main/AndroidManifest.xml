@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.bengohub.VitalsTracker">
 
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -95,7 +96,12 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.bengohub.VitalsTracker.Settings.ReminderActivity"
+            android:name="com.bengohub.VitalsTracker.Settings.AddReminderActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name="com.bengohub.VitalsTracker.Settings.ReminderListActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
 
