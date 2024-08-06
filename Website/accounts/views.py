@@ -22,7 +22,8 @@ from .serializers import *
 from django.contrib.auth.models import Group
 
 def doctors(request):
-    return render(request,'accounts/doctors.html')
+    docts=Doctor.objects.all()
+    return render(request,'accounts/doctors.html',{"doctors": docts})
 
 #android login endpoint
 class LoginAPIView(APIView):
