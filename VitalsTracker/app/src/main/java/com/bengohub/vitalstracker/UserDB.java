@@ -18,7 +18,7 @@ class user {
     private int age;
     private int height;
     private int weight;
-    private int gender;
+    private String gender;
 
     public String getUsername() {
         return username;
@@ -48,7 +48,7 @@ class user {
         return weight;
     }
 
-    public int getgender() {
+    public String getgender() {
         return gender;
     }
 
@@ -88,7 +88,7 @@ class user {
         weight = w;
     }
 
-    public void setgender(int gen) {
+    public void setgender(String gen) {
 
         gender = gen;
     }
@@ -231,7 +231,7 @@ public class UserDB extends SQLiteOpenHelper {
         String query = "select username, gender from users";
         Cursor cursor = db.rawQuery(query, null);
         String a, g;
-        g = "2";
+        g = "M";
 
         if (cursor.moveToFirst()) {
             do {

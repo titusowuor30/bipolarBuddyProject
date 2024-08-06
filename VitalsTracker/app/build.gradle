@@ -27,6 +27,9 @@ android {
 }
 
 dependencies {
+    implementation 'androidx.room:room-common:2.6.1'
+    implementation 'androidx.room:room-runtime:2.6.1'
+
     //implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestImplementation('androidx.test.espresso:espresso-core:3.6.1') {
         exclude group: 'com.android.support', module: 'support-annotations'
@@ -50,5 +53,6 @@ dependencies {
     // You can also add these for more advanced testing features
     androidTestImplementation 'androidx.test:runner:1.6.1'
     androidTestImplementation 'androidx.test:rules:1.6.1'
+    annotationProcessor 'androidx.room:room-compiler:2.6.1'
 }
 

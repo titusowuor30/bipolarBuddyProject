@@ -14,10 +14,12 @@ from django.urls import reverse_lazy
 from .forms import CustomAuthenticationForm
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework import permissions
 from .models import *
 from appointments.models import *
 from core.models import *
 from .serializers import *
+from django.contrib.auth.models import Group
 
 def doctors(request):
     docts=Doctor.objects.all()
@@ -75,6 +77,8 @@ def log_out(request):
 class PatientSignupViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+    authentication_classes = []
+    permission_classes = []
 
     def create(self, request, *args, **kwargs):
         print(request.data)
@@ -90,18 +94,31 @@ class PatientSignupViewSet(viewsets.ModelViewSet):
             'height': request.data.get('height'),
             'weight': request.data.get('weight')
         }
-        
+
         # Create a new CustomUser instance
         user_serializer = CustomUserSerializer(data=user_data)
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
+        pg, created = Group.objects.get_or_create(name='patients')
+        user.groups.add(pg)
+        user.save()
+
+        # Ensure 'doctor' field exists and is a valid reference
+        # doctor_id = request.data.get('doctor')
+        # if not doctor_id:
+        #     return Response({'detail': 'Doctor ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # try:
+        #     doctor = Doctor.objects.get(id=doctor_id)
+        # except Doctor.DoesNotExist:
+        #     return Response({'detail': 'Invalid doctor ID.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create the Patient instance using the newly created CustomUser
         patient_data = {
             'user': user.id,  # Link to the created CustomUser
-            'doctor': request.data.get('doctor')  # Ensure this field exists in the request
+            'doctor':None  # Ensure this field exists in the request
         }
-        
+
         patient_serializer = self.get_serializer(data=patient_data)
         patient_serializer.is_valid(raise_exception=True)
         self.perform_create(patient_serializer)
