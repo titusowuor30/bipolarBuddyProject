@@ -10,14 +10,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -47,9 +43,6 @@ public class ShakeService extends Service implements SensorEventListener {
         // Initialize UserDB
         userDB = new UserDB(this);
 
-        // Retrieve user from the database
-        user = getUserFromDatabase();
-
         if (accelerometer != null) {
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
         }
@@ -57,6 +50,9 @@ public class ShakeService extends Service implements SensorEventListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        // Retrieve user from the Intent extras
+        user = getUserFromIntent(intent);
+
         return START_STICKY;
     }
 
@@ -106,19 +102,19 @@ public class ShakeService extends Service implements SensorEventListener {
         // Ignore for this example
     }
 
-    private String getUserFromDatabase() {
-        // Retrieve the current user's username from SharedPreferences
-        SharedPreferences sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE);
-        String username = sharedPreferences.getString("Usr", "test1@test.com");
-
-        // Get user credentials from the database
-        String[] credentials = userDB.getUserCredentials(username);
-        if (credentials != null && credentials.length == 2) {
-            return credentials[0]; // Return the email as the user identifier
-        } else {
-            Log.e(TAG, "User not found in database");
-            return "test1@test.com";
+    private String getUserFromIntent(Intent intent) {
+        if (intent != null && intent.getExtras() != null) {
+            String username = intent.getExtras().getString("Usr");
+            // Get user credentials from the database
+            String[] credentials = userDB.getUserCredentials(username);
+            if (credentials != null && credentials.length == 2) {
+                return credentials[0]; // Return the email as the user identifier
+            } else {
+                Log.e(TAG, "User not found in database");
+                return "test1@test.com";
+            }
         }
+        return "test1@test.com";
     }
 
     private void sendShakeDataToApi(String user) {

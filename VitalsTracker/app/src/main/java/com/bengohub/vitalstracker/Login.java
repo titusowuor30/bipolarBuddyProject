@@ -97,7 +97,7 @@ public class Login extends AppCompatActivity {
             if (emailInput.isEmpty()) {
                 check1 = 1;
                 ed8.setError("Field can't be empty");
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
+            } else {
                 if (!Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()) {
                     check1 = 1;
                     ed8.setError("Please enter a valid email address");
@@ -156,10 +156,10 @@ public class Login extends AppCompatActivity {
                 weight = Integer.parseInt(weightStr);
                 height = Integer.parseInt(heightStr);
                 String text = GenderSpin.getSelectedItem().toString();
-                int k = 0;
+                String k = String.valueOf('M');
 
-                if (text.equals(m1)) k = 1;
-                if (text.equals(m2)) k = 2;
+                if (text.equals(m1)) k = String.valueOf('M');
+                if (text.equals(m2)) k = String.valueOf('F');
 
                 user per = new user();
                 per.setUsername(usrStr);

@@ -3,7 +3,7 @@ from .models import *
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password', 'first_name', 'last_name', 'gender', 'phone', 'dob', 'national_id']
+        fields = ['username', 'email', 'password', 'first_name', 'last_name', 'gender', 'phone','height','weight','age']
         extra_kwargs = {
             'password': {'write_only': True},
         }
@@ -14,7 +14,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
-            gender=validated_data['gender'],
+            gender=validated_data.get('gender'),
             phone=validated_data.get('phone'),
             age=validated_data.get('age'),
             height=validated_data.get('height'),
