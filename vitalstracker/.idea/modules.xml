@@ -7,6 +7,10 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.androidTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/VitalsTracker.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bipolarBuddyProject.VitalsTracker.iml" filepath="$PROJECT_DIR$/.idea/modules/bipolarBuddyProject.VitalsTracker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/bipolarBuddyProject.VitalsTracker.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/bipolarBuddyProject.VitalsTracker.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/bipolarBuddyProject.VitalsTracker.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/bipolarBuddyProject.VitalsTracker.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/bipolarBuddyProject.VitalsTracker.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/bipolarBuddyProject.VitalsTracker.app.unitTest.iml" />
     </modules>
   </component>
 </project>
