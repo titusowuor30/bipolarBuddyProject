@@ -14,6 +14,11 @@ from django.db.models import Q
 from django.shortcuts import render
 from .models import Vitals
 import json
+from django.contrib.auth import get_user_model
+from django.db.models import Q
+from datetime import datetime
+
+User=get_user_model()
 
 def patient_vital_trends(request, patient_id):
     # Retrieve all vitals for the patient
@@ -73,6 +78,7 @@ def home(request):
 def contact(request):
     return render(request, 'core/contact.html')
 
+
 class VitalsViewSet(viewsets.ModelViewSet):  # CRUD
     queryset = Vitals.objects.all()
     serializer_class = VitalsSerializer
@@ -80,8 +86,15 @@ class VitalsViewSet(viewsets.ModelViewSet):  # CRUD
     authentication_classes = []
 
     def create(self, request, *args, **kwargs):
-        useremail = request.data.get('user')
         print(request.data)
+        # Check if all required vitals are provided
+        vitals_data = {
+            'heart_rate': request.data.get('heart_rate',''),
+            'respiration_rate': request.data.get('respiration_rate',''),
+            'o2_saturation': request.data.get('o2_saturation',''),
+            'blood_pressure': request.data.get('blood_pressure',''),
+        }
+        useremail = request.data.get('user')
         if not useremail:
             return Response({"error": "User email is required."}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -89,16 +102,29 @@ class VitalsViewSet(viewsets.ModelViewSet):  # CRUD
         if not patient:
             return Response({"error": "Patient not found."}, status=status.HTTP_404_NOT_FOUND)
         
-        # Get the existing vitals entry for the patient if it exists
-        vitals_instance = Vitals.objects.filter(patient=patient).first()
-        if vitals_instance:
-            request.data['patient'] = patient.id
-            if vitals_instance.heart_rate !="" and vitals_instance.respiration_rate !="" and vitals_instance.blood_pressure !="" and vitals_instance !="":
-                serializer = self.get_serializer(data=request.data)
-            else:
-                request.data['patient'] = patient.id
-                serializer = self.get_serializer(vitals_instance, data=request.data, partial=True)
+        vitals_data['patient'] = patient.id
+        serializer = self.get_serializer(data=request.data)
         
+        # Get the existing vitals entry for the patient if it exists
+        vitals_instance = Vitals.objects.filter(patient=patient).order_by('-timestamp').first()
+
+        
+        print(vitals_data)
+        if not all(vitals_data.values()):
+            return Response({"error": "All vital fields and timestamp are required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # If existing vitals entry is found, check timestamp
+        if vitals_instance:
+            if vitals_instance.timestamp != datetime.now() and vitals_instance.heart_rate !="" and vitals_instance.respiration_rate !="" and vitals_instance.blood_pressure !="" and vitals_instance !="":
+                # Create new vitals entry
+                serializer = self.get_serializer(data=vitals_data)
+            else:
+                 # Update existing vitals entry
+                serializer = self.get_serializer(vitals_instance, data=request.data, partial=True)
+        else:
+            # Create new vitals entry
+            serializer = self.get_serializer(data=vitals_data)
+
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -119,7 +145,25 @@ class VitalsViewSet(viewsets.ModelViewSet):  # CRUD
         
         partial = kwargs.pop('partial', False)
         request.data['patient'] = patient.id
-        serializer = self.get_serializer(vitals_instance, data=request.data, partial=partial)
+        
+        # Check if all required vitals are provided
+        vitals_data = {
+            'heart_rate': request.data.get('heart_rate'),
+            'respiration_rate': request.data.get('respiration_rate'),
+            'blood_pressure': request.data.get('blood_pressure'),
+            'timestamp': request.data.get('timestamp')
+        }
+        
+        if not all(vitals_data.values()):
+            return Response({"error": "All vital fields and timestamp are required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if vitals_instance.timestamp == vitals_data['timestamp']:
+            # Update existing vitals entry
+            serializer = self.get_serializer(vitals_instance, data=request.data, partial=partial)
+        else:
+            # Create new vitals entry
+            serializer = self.get_serializer(data=request.data)
+        
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
@@ -136,9 +180,16 @@ class TremorsViewSet(viewsets.ModelViewSet):
     authentication_classes = []
 
     def create(self, request, *args, **kwargs):
-        # Ensure the request data is correctly formatted
-        print(request.data)
-        serializer = self.get_serializer(data=request.data)
+        # Ensure the request data is correctly formatte
+        print(request.data.get('user_email'))
+        user=User.objects.filter(Q(username=request.data.get('user_email'))|Q(email=request.data.get('user_email'))).first()
+        print(user)
+        user_email=None
+        if user is not None:
+            user_email=user.email
+        else:
+            user_email=request.data.get('user_email')
+        serializer = self.get_serializer(data={'user_email':user_email})
         if serializer.is_valid():
             # Save the tremor entry
             self.perform_create(serializer)

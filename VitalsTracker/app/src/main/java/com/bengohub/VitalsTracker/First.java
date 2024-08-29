@@ -1,5 +1,6 @@
 package com.bengohub.VitalsTracker;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -79,6 +80,11 @@ public class First extends AppCompatActivity {
                     i.putExtra("Usr", usrStr);
                     startActivity(i);
                     finish();
+                    // Save the username to SharedPreferences for use in ShakeService
+                    SharedPreferences sharedPreferences = getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("User", usrStr);
+                    editor.apply();
 
                 } else {
                     //Toast something

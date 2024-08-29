@@ -23,6 +23,8 @@ from .serializers import *
 from django.contrib.auth.models import Group
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
+
 
 @login_required
 def add_prescription(request):
@@ -113,59 +115,43 @@ class PatientSignupViewSet(viewsets.ModelViewSet):
     authentication_classes = []
     permission_classes = []
 
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
-        print(request.data)
+        # Extract data
         user_data = {
+            'email': request.data.get('email'),
             'username': request.data.get('username'),
+            'password': request.data.get('password'),
             'first_name': request.data.get('first_name'),
             'last_name': request.data.get('last_name'),
-            'email': request.data.get('email'),
-            'password': request.data.get('password'),
-            'gender': request.data.get('gender'),
             'phone': request.data.get('phone'),
             'age': request.data.get('age'),
             'height': request.data.get('height'),
-            'weight': request.data.get('weight')
+            'weight': request.data.get('weight'),
+            'gender': request.data.get('gender'),
         }
 
-        # Create a new CustomUser instance
+       # Create CustomUser instance
         user_serializer = CustomUserSerializer(data=user_data)
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
+
+        # Add the user to 'patients' group
         pg, created = Group.objects.get_or_create(name='patients')
         user.groups.add(pg)
         user.save()
 
-        # Ensure 'doctor' field exists and is a valid reference
-        # doctor_id = request.data.get('doctor')
-        # if not doctor_id:
-        #     return Response({'detail': 'Doctor ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        # Create Patient instance
+        patient,create=Patient.objects.get_or_create(user=user,doctor=None)
+        # Return response
+        return Response({
+            'user': user_serializer.data,
+            'patient': {
+                'id': patient.id,
+                'doctor': None
+            }
+        }, status=status.HTTP_201_CREATED)
 
-        # try:
-        #     doctor = Doctor.objects.get(id=doctor_id)
-        # except Doctor.DoesNotExist:
-        #     return Response({'detail': 'Invalid doctor ID.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Create the Patient instance using the newly created CustomUser
-        patient_data = {
-            'user': user.id,  # Link to the created CustomUser
-            'doctor':None  # Ensure this field exists in the request
-        }
-
-        patient_serializer = self.get_serializer(data=patient_data)
-        patient_serializer.is_valid(raise_exception=True)
-        self.perform_create(patient_serializer)
-
-        headers = self.get_success_headers(patient_serializer.data)
-        return Response(patient_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    
-
-    class DoctorViewSet(viewsets.ReadOnlyModelViewSet):
-        queryset = Doctor.objects.all()
-        serializer_class = DoctorSerializer
-        permission_classes = []
-        authentication_classes = []
-    
 class DoctorViewSet(viewsets.ModelViewSet):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
