@@ -82,6 +82,7 @@
                         {% if user.is_staff %}
                         <li><a href="/admin">Admin</a></li>
                         {% endif %}
+                        <li><a href="/analytics">Analytics</a></li>
                 {% else %}
                     <li><a href="{% url 'login' %}">Login</a></li>
                     <li><a href="{% url 'signup' %}">Sign Up</a></li>
