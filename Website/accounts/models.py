@@ -79,7 +79,7 @@ class  Patient(models.Model):
     user=models.OneToOneField("CustomUser", on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name} - {self.doctor.user.first_name}"
+        return f"{self.user.first_name} {self.user.last_name} - {self.doctor.user.first_name if self.doctor else None}"
 
 class PatientKin(models.Model):
     RELATIONSHIPS=[("Sp", "Spouse"), ("Sb","Sibling"), ("P", "Parent"), ("Gp","GrandParent"), ("Other", "Other")]

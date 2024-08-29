@@ -146,7 +146,6 @@ class DoctorViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(id=department_id)
         return queryset
     
-
 def patient_profile(request):
     user = request.user
     appointments = Appointment.objects.filter(user=user).order_by('date')
@@ -164,7 +163,7 @@ def doctor_profile(request):
     vitals = Vitals.objects.filter(patient__in=patients)
     tremors = Tremors.objects.filter(patient__in=patients)
     prescriptions = Prescription.objects.filter(patient__in=patients)
-    appointments = Appointment.objects.filter(doctor=doctor)
+    appointments = Appointment.objects.filter(doctor=doctor)# SELCT * FROM accounts_appointments WHERE doctor_id=2;
     context = {
         'user': user,
         'doctor': doctor,

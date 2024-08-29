@@ -8,10 +8,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import java.io.IOException;
 
@@ -21,6 +23,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+@RequiresApi(api = Build.VERSION_CODES.CUPCAKE)
 public class ShakeService extends Service implements SensorEventListener {
 
     private static final String TAG = "ShakeService";
@@ -48,6 +51,7 @@ public class ShakeService extends Service implements SensorEventListener {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.ECLAIR)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Retrieve user from the Intent extras

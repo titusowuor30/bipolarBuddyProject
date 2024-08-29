@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-aki!-0w-8!2el-o7xik)2kx&=!$@5qlx_pco((cv*--z$5+!fr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.137.62','192.168.8.12','192.168.8.6','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['192.168.117.223','192.168.8.12','192.168.8.6','localhost','127.0.0.1']
 
 
 # Application definition
@@ -53,7 +53,7 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL="accounts.CustomUser"
 
 LOGIN_REDIRECT_URL = 'home' 
-LOGOUT_REDIRECT_URL = 'home' 
+#LOGOUT_REDIRECT_URL = 'home' 
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -105,7 +105,7 @@ DATABASES = {
         'USER':'root',
         'HOST':'localhost',
         'PORT':3306,
-        'PASSWORD':'',
+        'PASSWORD':'root',
     }
 }
 
