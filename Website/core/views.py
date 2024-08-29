@@ -104,7 +104,7 @@ class VitalsViewSet(viewsets.ModelViewSet):  # CRUD
 
         # If existing vitals entry is found, check timestamp
         if vitals_instance:
-            if vitals_instance.timestamp != datetime.now() and vitals_instance.heart_rate !=None and vitals_instance.respiration_rate !=None and vitals_instance.blood_pressure !=None and vitals_instance !=None:
+            if vitals_instance.timestamp == datetime.now() and vitals_instance.heart_rate !=None and vitals_instance.respiration_rate !=None and vitals_instance.blood_pressure !=None and vitals_instance !=None:
                 # Update existing vitals entry
                 serializer = self.get_serializer(vitals_instance, data=request.data, partial=True)
             else:
