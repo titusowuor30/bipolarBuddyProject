@@ -1,11 +1,15 @@
 package com.bengohub.VitalsTracker;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
@@ -17,11 +21,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bengohub.VitalsTracker.Math.Fft;
 import com.bengohub.VitalsTracker.Math.Fft2;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.sqrt;
+
+import org.json.JSONObject;
 
 public class VitalSignsProcess extends AppCompatActivity {
 
@@ -90,7 +103,7 @@ public class VitalSignsProcess extends AppCompatActivity {
         Hei = Integer.parseInt(Data.getheight(user));
         Wei = Integer.parseInt(Data.getweight(user));
         Agg = Integer.parseInt(Data.getage(user));
-        Gen = Integer.parseInt(Data.getgender(user));
+        Gen = Objects.equals(Data.getgender(user), "M") ? 1 : 2;
 
         if (Gen == 1) {
             Q = 5;
@@ -312,6 +325,7 @@ public class VitalSignsProcess extends AppCompatActivity {
                 i.putExtra("DP", DP);
                 i.putExtra("Usr", user);
                 startActivity(i);
+                processVitalSignsData(o2,Breath,Beats,SP,DP);
                 finish();
             }
 
@@ -323,6 +337,59 @@ public class VitalSignsProcess extends AppCompatActivity {
             processing.set(false);
         }
     };
+
+    private void processVitalSignsData(double o2, double breath, double bpm, int sp, int dp) {
+        new Thread(() -> {
+            HttpURLConnection urlConnection = null;
+            try {
+                SharedPreferences sharedPreferences = getSharedPreferences("ApiSettings", Context.MODE_PRIVATE);
+                String baseUrl = sharedPreferences.getString("api_base_url", "http://192.168.8.12:8000/api/");
+                if (baseUrl == null || baseUrl.isEmpty()) {
+                    Log.e(TAG, "API base URL is not set.");
+                    return;
+                }
+                URL url = new URL(baseUrl + "vitals/");
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("heart_rate", bpm);
+                jsonParam.put("blood_pressure", sp + "/" + dp);
+                jsonParam.put("respiration_rate", breath);
+                jsonParam.put("o2_saturation", o2);
+                jsonParam.put("user", user);
+
+                OutputStream os = urlConnection.getOutputStream();
+                os.write(jsonParam.toString().getBytes(StandardCharsets.UTF_8));
+                os.close();
+
+                int responseCode = urlConnection.getResponseCode();
+                Log.d(TAG, "Response Code: " + responseCode);
+
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    Log.d(TAG, "Data sent successfully");
+                } else {
+                    Log.e(TAG, "Error in sending data: " + responseCode);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        response.append(line);
+                    }
+                    in.close();
+                    Log.e(TAG, "Response: " + response.toString());
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in sending heart rate result", e);
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+        }).start();
+    }
 
     private final SurfaceHolder.Callback surfaceCallback = new SurfaceHolder.Callback() {
 

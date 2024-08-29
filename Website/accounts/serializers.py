@@ -26,9 +26,20 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 
 class PatientSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer()
+
     class Meta:
         model = Patient
         fields = ['user', 'doctor']
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user_serializer = CustomUserSerializer(data=user_data)
+        user_serializer.is_valid(raise_exception=True)
+        user = user_serializer.save()
+
+        patient = Patient.objects.create(user=user, **validated_data)
+        return patient
 
 class DoctorSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()

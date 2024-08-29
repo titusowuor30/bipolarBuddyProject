@@ -30,6 +30,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.Math.ceil;
@@ -87,7 +88,7 @@ public class BloodPressureProcess extends Activity {
         Hei = Integer.parseInt(Data.getheight(user));
         Wei = Integer.parseInt(Data.getweight(user));
         Agg = Integer.parseInt(Data.getage(user));
-        Gen = Integer.parseInt(Data.getgender(user));
+        Gen = Objects.equals(Data.getgender(user), "M") ? 1 : 2;
 
         if (Gen == 1) {
             Q = 5;

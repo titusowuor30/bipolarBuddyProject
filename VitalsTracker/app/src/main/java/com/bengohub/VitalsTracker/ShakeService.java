@@ -106,18 +106,11 @@ public class ShakeService extends Service implements SensorEventListener {
     }
 
     private String getUserFromIntent(Intent intent) {
-        if (intent != null && intent.getExtras() != null) {
-            String username = intent.getExtras().getString("Usr");
-            // Get user credentials from the database
-            String[] credentials = userDB.getUserCredentials(username);
-            if (credentials != null && credentials.length == 2) {
-                return credentials[0]; // Return the email as the user identifier
-            } else {
-                Log.e(TAG, "User not found in database");
-                return "test1@test.com";
-            }
-        }
-        return "test1@test.com";
+        //get user
+        SharedPreferences userPreferences = getSharedPreferences("AppSettings", Context.MODE_PRIVATE);
+        user = userPreferences.getString("User", "test1@test.com");
+
+        return user; // Return the email as the user identifier
     }
 
     private void sendShakeDataToApi(String user) {
