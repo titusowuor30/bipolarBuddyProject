@@ -77,11 +77,15 @@
                     {% elif user.patient %}
                         <li><a href="{% url 'patient_profile' %}">Profile</a></li>
                     {% elif user.patientkin %}
-                        <li><a href="{% url 'patient_kin_profile' %}">Profile</a></li>
+                        <li><a href="{% url 'kin_profile' %}">Profile</a></li>
                     {% endif %}
+                        {% if user.is_staff %}
+                        <li><a href="/admin">Admin</a></li>
+                        {% endif %}
                 {% else %}
                     <li><a href="{% url 'login' %}">Login</a></li>
                     <li><a href="{% url 'signup' %}">Sign Up</a></li>
+                    
                 {% endif %}
             </ul>
             </li>

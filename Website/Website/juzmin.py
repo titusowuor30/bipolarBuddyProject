@@ -40,7 +40,7 @@ JAZZMIN_SETTINGS = {
     "topmenu_links": [
 
         # Url that gets reversed (Permissions can be added)
-        {"name": "Home",  "url": "/admin", "permissions": ["auth.view_user"]},
+        {"name": "Home",  "url": "/", "permissions": ["auth.view_user"]},
 
         # model admin to link to (Permissions checked against model)
         {"model": "accounts.CustomUser"},
