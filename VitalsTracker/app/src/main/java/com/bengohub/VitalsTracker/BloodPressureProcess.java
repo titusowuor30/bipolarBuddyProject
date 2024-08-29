@@ -322,7 +322,7 @@ public class BloodPressureProcess extends Activity {
                 conn.setRequestProperty("Authorization", auth);
 
                 JSONObject jsonParam = new JSONObject();
-                jsonParam.put("blood_pressure", "sp:" + sp + ",dp:" + dp);
+                jsonParam.put("blood_pressure", sp + "/" + dp);
                 jsonParam.put("user", userEmail);
                 Log.d(TAG, user);
 

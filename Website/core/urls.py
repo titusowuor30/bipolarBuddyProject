@@ -13,5 +13,5 @@ urlpatterns=[
     #path("vitals/",VitalsAPIView.as_view(),name='vitals'),
     path("departments/",departments,name='departments'),
     path("contact-us/",contact,name='contact'),
-
+    path('patient/<int:patient_id>/vital-trends/', patient_vital_trends, name='patient_vital_trends'),
 ]

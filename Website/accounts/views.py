@@ -185,6 +185,7 @@ def patient_profile(request):
     
     context = {
         'user': user,
+        'patient':Patient.objects.get(user=user),
         'appointments': appointments
     }
     return render(request, 'accounts/patient_profile.html', context)
