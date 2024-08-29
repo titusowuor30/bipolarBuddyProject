@@ -87,7 +87,6 @@ public class ShakeService extends Service implements SensorEventListener {
         float gX = x / SensorManager.GRAVITY_EARTH;
         float gY = y / SensorManager.GRAVITY_EARTH;
         float gZ = z / SensorManager.GRAVITY_EARTH;
-
         float gForce = (float) Math.sqrt(gX * gX + gY * gY + gZ * gZ);
 
         if (gForce > SHAKE_THRESHOLD_GRAVITY) {
