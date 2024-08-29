@@ -174,7 +174,7 @@ public class Login extends AppCompatActivity {
 
                 // Retrieve API base URL from SharedPreferences
                 SharedPreferences sharedPreferences = getSharedPreferences("ApiSettings", MODE_PRIVATE);
-                String apiBaseUrl = sharedPreferences.getString("api_base_url", "http://192.168.117.223:8000/api/");
+                String apiBaseUrl = sharedPreferences.getString("api_base_url", "http://192.168.137.178:8000/api/");
 
                 // Post user details to API
                 postUserDetailsToApi(apiBaseUrl, per);
