@@ -1,6 +1,5 @@
 from django.db import models
-from accounts.models import Patient, Doctor
-
+from accounts.models import *
 
 class Vitals(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
@@ -39,3 +38,4 @@ class Prescription(models.Model):
 
     def __str__(self):
         return f"Prescription for {self.patient.user.email} by Dr. {self.doctor.user.email}"
+    

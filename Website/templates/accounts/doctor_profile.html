@@ -1,5 +1,5 @@
 {% extends 'core/base.html' %}
-
+{% load static %}
 {% block content %}
 <!-- Doctor Profile Section -->
 <section id="doctor-profile" class="doctor-profile section">
@@ -10,7 +10,11 @@
             <!-- Account Details -->
             <div class="col-md-6">
                 <h3>Account Details</h3>
-                <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                {% if doc.user.pic %}
+                <img src="{{ doctor.profile_pic.url }}" alt="Profile Picture" class="img-fluid rounded-circle mb-3" width="150"> <!-- Profile Picture -->
+                {% else %}
+                <img src="{% static 'assets/img/doctors/doctors-1.jpg' %}" alt="Profile Picture" class="img-fluid rounded-circle mb-3" width="150"> <!-- Profile Picture -->
+                {% endif %}                <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
                 <p><strong>Email:</strong> {{ user.email }}</p>
                 <p><strong>Phone:</strong> {{ user.phone }}</p>
                 <p><strong>Department:</strong> {{ doctor.department.name }}</p>
@@ -100,6 +104,7 @@
                             <th>Medication</th>
                             <th>Dosage</th>
                             <th>Created At</th>
+                            <th>Actions</th> <!-- New Actions Column -->
                         </tr>
                     </thead>
                     <tbody>
@@ -109,16 +114,109 @@
                             <td>{{ prescription.medication_name }}</td>
                             <td>{{ prescription.dosage }}</td>
                             <td>{{ prescription.created_at }}</td>
+                            <td>
+                                <!-- Edit Button -->
+                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editPrescriptionModal{{ prescription.id }}">
+                                    Edit
+                                </button>
+                                <!-- Delete Button -->
+                                <form method="post" action="{% url 'delete_prescription' prescription.id %}" class="d-inline-block">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
                         </tr>
+        
+                        <!-- Edit Prescription Modal -->
+                        <div class="modal fade" id="editPrescriptionModal{{ prescription.id }}" tabindex="-1" aria-labelledby="editPrescriptionModalLabel{{ prescription.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editPrescriptionModalLabel{{ prescription.id }}">Edit Prescription</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="post" action="{% url 'edit_prescription' prescription.id %}">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <label for="patient">Patient</label>
+                                                <select name="patient" class="form-control" id="patient">
+                                                    {% for patient in patients %}
+                                                    <option value="{{ patient.id }}" {% if patient == prescription.patient %}selected{% endif %}>
+                                                        {{ patient.user.first_name }} {{ patient.user.last_name }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="medication_name">Medication Name</label>
+                                                <input type="text" name="medication_name" class="form-control" id="medication_name" value="{{ prescription.medication_name }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="dosage">Dosage</label>
+                                                <input type="text" name="dosage" class="form-control" id="dosage" value="{{ prescription.dosage }}">
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         {% empty %}
                         <tr>
-                            <td colspan="4">No prescriptions found</td>
+                            <td colspan="5">No prescriptions found</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
+        
+        <!-- Add Prescription Button -->
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addPrescriptionModal">
+            Add Prescription
+        </button>
+        
+        <!-- Add Prescription Modal -->
+        <div class="modal fade" id="addPrescriptionModal" tabindex="-1" aria-labelledby="addPrescriptionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addPrescriptionModalLabel">Add Prescription</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="{% url 'add_prescription' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="patient">Patient</label>
+                                <select name="patient" class="form-control" id="patient">
+                                    {% for patient in patients %}
+                                    <option value="{{ patient.id }}">
+                                        {{ patient.user.first_name }} {{ patient.user.last_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="medication_name">Medication Name</label>
+                                <input type="text" name="medication_name" class="form-control" id="medication_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="dosage">Dosage</label>
+                                <input type="text" name="dosage" class="form-control" id="dosage">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Prescription</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="row mt-4">
             <!-- Appointments Management -->
             <div class="col-md-12">
@@ -149,7 +247,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6">No appointments to manage</td>
+                            <td colspan="4">No appointments available</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -158,4 +256,4 @@
         </div>
     </div>
 </section>
-{% endblock content %}
+{% endblock %}
