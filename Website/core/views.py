@@ -80,7 +80,7 @@ def contact(request):
 
 
 class VitalsViewSet(viewsets.ModelViewSet):  # CRUD
-    queryset = Vitals.objects.all()
+    queryset = Vitals.objects.all().order_by('-timestamp')
     serializer_class = VitalsSerializer
     permission_classes = []
     authentication_classes = []
@@ -88,12 +88,6 @@ class VitalsViewSet(viewsets.ModelViewSet):  # CRUD
     def create(self, request, *args, **kwargs):
         print(request.data)
         # Check if all required vitals are provided
-        vitals_data = {
-            'heart_rate': request.data.get('heart_rate',''),
-            'respiration_rate': request.data.get('respiration_rate',''),
-            'o2_saturation': request.data.get('o2_saturation',''),
-            'blood_pressure': request.data.get('blood_pressure',''),
-        }
         useremail = request.data.get('user')
         if not useremail:
             return Response({"error": "User email is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -102,28 +96,23 @@ class VitalsViewSet(viewsets.ModelViewSet):  # CRUD
         if not patient:
             return Response({"error": "Patient not found."}, status=status.HTTP_404_NOT_FOUND)
         
-        vitals_data['patient'] = patient.id
+        request.data['patient'] = patient.id
         serializer = self.get_serializer(data=request.data)
         
         # Get the existing vitals entry for the patient if it exists
-        vitals_instance = Vitals.objects.filter(patient=patient).order_by('-timestamp').first()
+        vitals_instance = Vitals.objects.order_by('-timestamp').filter(patient=patient).first()
 
-        
-        print(vitals_data)
-        if not all(vitals_data.values()):
-            return Response({"error": "All vital fields and timestamp are required."}, status=status.HTTP_400_BAD_REQUEST)
-        
         # If existing vitals entry is found, check timestamp
         if vitals_instance:
-            if vitals_instance.timestamp != datetime.now() and vitals_instance.heart_rate !="" and vitals_instance.respiration_rate !="" and vitals_instance.blood_pressure !="" and vitals_instance !="":
-                # Create new vitals entry
-                serializer = self.get_serializer(data=vitals_data)
-            else:
-                 # Update existing vitals entry
+            if vitals_instance.timestamp == datetime.now() and vitals_instance.heart_rate !=None and vitals_instance.respiration_rate !=None and vitals_instance.blood_pressure !=None and vitals_instance !=None:
+                # Update existing vitals entry
                 serializer = self.get_serializer(vitals_instance, data=request.data, partial=True)
+            else:
+                # Create new vitals entry
+                serializer = self.get_serializer(data=request.data)
         else:
             # Create new vitals entry
-            serializer = self.get_serializer(data=vitals_data)
+            serializer = self.get_serializer(data=request.data)
 
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
