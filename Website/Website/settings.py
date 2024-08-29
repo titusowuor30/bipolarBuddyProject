@@ -27,12 +27,7 @@ SECRET_KEY = 'django-insecure-aki!-0w-8!2el-o7xik)2kx&=!$@5qlx_pco((cv*--z$5+!fr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-<<<<<<< HEAD
 ALLOWED_HOSTS = ['192.168.117.223','192.168.8.12','192.168.8.6','localhost','127.0.0.1']
-=======
-ALLOWED_HOSTS = ['192.168.137.62','192.168.8.12','192.168.137.219','localhost','127.0.0.1']
-X_FRAME_OPTIONS = 'SAMEORIGIN'
->>>>>>> 4e7a7568bd252cee22c7b8343583c819532b9d46
 
 
 # Application definition

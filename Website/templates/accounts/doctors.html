@@ -16,15 +16,11 @@
           {% for doc in doctors %}
           <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
             <div class="team-member d-flex align-items-start">
-<<<<<<< HEAD
               {% if doc.user.pic %}
               <div class="pic"><img src="{{doc.user.pic.url}}" class="img-fluid" alt="Dr. Njeri Mwangi"></div>
               {% else %}
               <div class="pic"><img src="{% static 'assets/img/doctors/doctors-1.jpg' %}" class="img-fluid" alt="Dr. Njeri Mwangi"></div>
               {% endif %}
-=======
-              <div class="pic"><img src="{% static 'assets/img/doctor2.jpeg' %}" class="img-fluid" alt="Dr. Njeri Mwangi"></div>
->>>>>>> 4e7a7568bd252cee22c7b8343583c819532b9d46
               <div class="member-info">
                 <h4>Dr. {{doc.user.last_name}} {{doc.user.first_name}}</h4>
                 <span>{{doc.specialization}}</span>
