@@ -16,6 +16,13 @@
                 <p><strong>Age:</strong> {{ user.age }}</p>
                 <p><strong>Height:</strong> {{ user.height }}</p>
                 <p><strong>Weight:</strong> {{ user.weight }}</p>
+                <p class="list-group-item">
+                    {{ patient.user.first_name }} {{ patient.user.last_name }}
+                    <!-- Link to view vital trends -->
+                    <a href="{% url 'patient_vital_trends' patient.id %}" class="btn btn-primary btn-sm float-right">
+                        View Vital Trends
+                    </a>
+                </p>
             </div>
             <!-- Upcoming Appointments -->
             <div class="col-md-6">

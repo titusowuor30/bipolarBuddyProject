@@ -27,6 +27,10 @@
                     {% for patient in patients %}
                     <li class="list-group-item">
                         {{ patient.user.first_name }} {{ patient.user.last_name }}
+                        <!-- Link to view vital trends -->
+                        <a href="{% url 'patient_vital_trends' patient.id %}" class="btn btn-primary btn-sm float-right">
+                            View Vital Trends
+                        </a>
                     </li>
                     {% empty %}
                     <li class="list-group-item">No patients assigned</li>

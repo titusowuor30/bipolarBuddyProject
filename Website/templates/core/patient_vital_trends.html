@@ -1,0 +1,108 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Vital Trends for {{ patient.user.first_name }} {{ patient.user.last_name }}</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Heart Rate</h3>
+            <canvas id="heartRateChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h3>Blood Pressure</h3>
+            <canvas id="bloodPressureChart"></canvas>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Oxygen Saturation</h3>
+            <canvas id="o2SaturationChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h3>Respiration Rate</h3>
+            <canvas id="respirationRateChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Extract the context data from the Django template
+    const timestamps = JSON.parse('{{ timestamps|escapejs }}');
+    const heartRates = JSON.parse('{{ heart_rates|escapejs }}');
+    const systolicBP = JSON.parse('{{ systolic_bp|escapejs }}');
+    const diastolicBP = JSON.parse('{{ diastolic_bp|escapejs }}');
+    const o2Saturations = JSON.parse('{{ o2_saturations|escapejs }}');
+    const respirationRates = JSON.parse('{{ respiration_rates|escapejs }}');
+
+    // Create the Heart Rate chart
+    const ctxHeartRate = document.getElementById('heartRateChart').getContext('2d');
+    new Chart(ctxHeartRate, {
+        type: 'line',
+        data: {
+            labels: timestamps,
+            datasets: [{
+                label: 'Heart Rate (bpm)',
+                data: heartRates,
+                borderColor: 'rgb(255, 99, 132)',
+                fill: false
+            }]
+        }
+    });
+
+    // Create the Blood Pressure chart
+    const ctxBloodPressure = document.getElementById('bloodPressureChart').getContext('2d');
+    new Chart(ctxBloodPressure, {
+        type: 'line',
+        data: {
+            labels: timestamps,
+            datasets: [
+                {
+                    label: 'Systolic BP (mmHg)',
+                    data: systolicBP,
+                    borderColor: 'rgb(54, 162, 235)',
+                    fill: false
+                },
+                {
+                    label: 'Diastolic BP (mmHg)',
+                    data: diastolicBP,
+                    borderColor: 'rgb(75, 192, 192)',
+                    fill: false
+                }
+            ]
+        }
+    });
+
+    // Create the Oxygen Saturation chart
+    const ctxO2Saturation = document.getElementById('o2SaturationChart').getContext('2d');
+    new Chart(ctxO2Saturation, {
+        type: 'line',
+        data: {
+            labels: timestamps,
+            datasets: [{
+                label: 'Oxygen Saturation (%)',
+                data: o2Saturations,
+                borderColor: 'rgb(153, 102, 255)',
+                fill: false
+            }]
+        }
+    });
+
+    // Create the Respiration Rate chart
+    const ctxRespirationRate = document.getElementById('respirationRateChart').getContext('2d');
+    new Chart(ctxRespirationRate, {
+        type: 'line',
+        data: {
+            labels: timestamps,
+            datasets: [{
+                label: 'Respiration Rate (breaths per minute)',
+                data: respirationRates,
+                borderColor: 'rgb(255, 159, 64)',
+                fill: false
+            }]
+        }
+    });
+</script>
+{% endblock extra_scripts %}

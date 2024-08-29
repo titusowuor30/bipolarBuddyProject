@@ -11,6 +11,60 @@ from .models import *
 from accounts.models import Departments
 from .serializers import *
 from django.db.models import Q
+from django.shortcuts import render
+from .models import Vitals
+import json
+
+def patient_vital_trends(request, patient_id):
+    # Retrieve all vitals for the patient
+    vitals = Vitals.objects.filter(patient_id=patient_id).order_by('timestamp')
+    patient=Patient.objects.get(id=patient_id)
+
+    # Prepare data for graphing
+    timestamps = []
+    heart_rates = []
+    systolic_bp = []
+    diastolic_bp = []
+    o2_saturations = []
+    respiration_rates = []
+
+    for vital in vitals:
+        timestamps.append(vital.timestamp.strftime('%Y-%m-%d %H:%M:%S'))
+
+        # Convert heart_rate and respiration_rate to integers, replacing null with 0
+        heart_rates.append(int(vital.heart_rate) if vital.heart_rate else 0)
+        respiration_rates.append(int(vital.respiration_rate) if vital.respiration_rate else 0)
+
+        # Split blood_pressure into systolic and diastolic, replacing null with 0
+        if vital.blood_pressure:
+            bp_values = vital.blood_pressure.split('/')
+            if len(bp_values) == 2:
+                systolic_bp.append(int(bp_values[0]) if bp_values[0] else 0)
+                diastolic_bp.append(int(bp_values[1]) if bp_values[1] else 0)
+            else:
+                systolic_bp.append(0)
+                diastolic_bp.append(0)
+        else:
+            systolic_bp.append(0)
+            diastolic_bp.append(0)
+
+        # Convert o2_saturation to integers, replacing null with 0
+        o2_saturations.append(int(vital.o2_saturation) if vital.o2_saturation else 0)
+
+    context = {
+        'patient': patient,  # Assuming there's at least one vital record
+        'timestamps': json.dumps(timestamps),
+        'heart_rates': json.dumps(heart_rates),
+        'systolic_bp': json.dumps(systolic_bp),
+        'diastolic_bp': json.dumps(diastolic_bp),
+        'o2_saturations': json.dumps(o2_saturations),
+        'respiration_rates': json.dumps(respiration_rates),
+    }
+
+    print(context)
+
+    return render(request, 'core/patient_vital_trends.html', context)
+
 
 # Create your views here.
 def home(request):
