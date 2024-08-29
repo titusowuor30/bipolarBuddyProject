@@ -17,6 +17,11 @@ import json
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from datetime import datetime
+from notifications.models import *
+from notifications.modules.custom_email_backend import *
+from notifications.email_templates import tremor_notification_message
+import threading
+
 
 User=get_user_model()
 
@@ -176,6 +181,16 @@ class TremorsViewSet(viewsets.ModelViewSet):
         user_email=None
         if user is not None:
             user_email=user.email
+            patient=Patient.objects.get(user=user)
+            doctor=patient.doctor
+            msg=tremor_notification_message(f"{patient.user.first_name} {patient.user.last_name}",doctor if doctor is not None else "Unknown")
+            email_thread = threading.Thread(
+                target=BipolarBuddyEmailBackend(request,subject='Tremor Notification',body=msg,to=['titusowuor30@gmail.com'],attachments=[]).send_email_in_thread(),
+                )
+            print("Email sent!")
+            email_thread.start()  
+            #add notification    
+            notf,created=Notification.objects.get_or_create(from_user=patient.user,to_user=doctor.user if doctor is not None else None,title="Tremor Notification!",message=f"Your patient {patient.user.first_name} experienced an episode at {datetime.now()}")
         else:
             user_email=request.data.get('user_email')
         serializer = self.get_serializer(data={'user_email':user_email})
