@@ -18,8 +18,41 @@ from rest_framework import permissions
 from .models import *
 from appointments.models import *
 from core.models import *
+from core.forms import *
 from .serializers import *
 from django.contrib.auth.models import Group
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def add_prescription(request):
+    if request.method == 'POST':
+        form = PrescriptionForm(request.POST)
+        if form.is_valid():
+            prescription = form.save(commit=False)  # Don't save to database yet
+            prescription.doctor = request.user.doctor  # Assign the current doctor
+            prescription.save()  # Now save the object to the database
+            return redirect('doctor_profile')
+    else:
+        form = PrescriptionForm()
+    return redirect('doctor_profile')
+
+@login_required
+def edit_prescription(request, pk):
+    print(request.user.doctor.id)
+    prescription = get_object_or_404(Prescription, pk=pk)
+    if request.method == 'POST':
+        form = PrescriptionForm(request.POST, instance=prescription)
+        if form.is_valid():
+            form.save()
+            return redirect('doctor_profile')
+    return redirect('doctor_profile')
+
+@login_required
+def delete_prescription(request, pk):
+    prescription = get_object_or_404(Prescription, pk=pk)
+    prescription.delete()
+    return redirect('doctor_profile')
 
 def doctors(request):
     docts=Doctor.objects.all()
